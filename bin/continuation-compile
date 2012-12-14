@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+var continuation = require('../lib/continuation');
+
+if (process.argv.length !== 3) {
+  console.log('Usage: $0 <filename>');
+  process.exit(1);
+}
+
+fs.readFile(process.argv[2], 'utf8', function(err, data) {
+  if (err) throw err;
+  process.stdout.write(continuation.compile(data));
+  process.exit(0);
+});

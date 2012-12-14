@@ -1,4 +1,4 @@
 continuation.js
 ===============
 
-Continuation for JavaScript
+Continuation support for Node.js

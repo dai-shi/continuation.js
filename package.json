@@ -1,0 +1,27 @@
+{
+  "name": "continuation.js",
+  "description": "Continuation support for Node.js",
+  "version": "0.0.1",
+  "author": "Daishi Kato <daishi@axlight.com>",
+  "dependencies": {
+    "esprima": ">=1.0.2",
+    "escodegen": ">=0.0.15",
+    "underscore": ">=1.4.3"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "jshint": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dai-shi/continuation.js.git"
+  },
+  "bin": {
+    "continuation-compile": "./bin/continuation-compile"
+  },
+  "main": "./lib/continuation",
+  "license": "BSD",
+  "engines": {
+    "node": ">=0.6.19"
+  }
+}
