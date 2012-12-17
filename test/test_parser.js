@@ -5,7 +5,7 @@ var continuation = require('../src/continuation.js');
 
 describe('basic parser', function() {
 
-  it('should parse empty function', function(done) {
+  it('should parse empty functions', function(done) {
     assert.deepEqual(continuation.parse('function foo(){}'), {
       "type": "Program",
       "body": [{
@@ -79,6 +79,10 @@ describe('basic parser', function() {
         "kind": "var"
       }]
     });
+    done();
+  });
+
+  it('should parse some functions', function(done) {
     assert.deepEqual(continuation.parse('function foo(){console.log(arguments[3]);for(var i = 0; ; ){}}'), {
       "type": "Program",
       "body": [{

@@ -18,7 +18,7 @@ function fact_tail(x) {
 }
 
 function dummy() {
-  console.log(arguments.length);
+  return console.log(arguments.length);
 }
 dummy(1, 2, 3, 4);
 

@@ -35,16 +35,37 @@ root.parse = function(data) {
   return esprima.parse(data);
 };
 
-root.ast_prog_header = function() {
-  var code = root.parse("(function() { if (typeof CpsFunction === 'undefined') { CpsFunction = function(f, k) { this.f = f; this.k = k; }; } if (typeof CpsContinuation === 'undefined') { CpsContinuation = function(k) { if (k) { this.k = k; } else { this.k = function(r) { return r; }; }}; } if (typeof CpsResult === 'undefined') { CpsResult = function(r) { this.r = r; }; } if (typeof CpsRun === 'undefined') { CpsRun = function(x) { var last_k; while (x instanceof CpsFunction) { last_k = x.k; x = x.f(x.k); } if (x instanceof CpsResult) { return x.r; } else { return last_k.k(x); }}; }})()");
-  assert.equal(code.type, 'Program');
-  assert.equal(code.body.length, 1);
-  return code.body[0];
+root.push = function(lst, itm) {
+  if (itm instanceof Array) {
+    for (var i = 0; i < itm.length; i++) {
+      lst.push(itm[i]);
+    }
+  } else {
+    lst.push(itm);
+  }
 };
 
-var new_variable_counter = 1;
+root.unshift = function(lst, itm) {
+  if (itm instanceof Array) {
+    for (var i = itm.length - 1; i >= 0; i--) {
+      lst.unshift(itm[i]);
+    }
+  } else {
+    lst.unshift(itm);
+  }
+};
+
+root.ast_prog_header = function() {
+  var code = root.parse("if (typeof CpsFunction === 'undefined') { CpsFunction = function(f, k) { this.f = f; this.k = k; }; } if (typeof CpsContinuation === 'undefined') { CpsContinuation = function(k) { if (k) { this.k = k; } else { this.k = function(r) { return r; }; }}; } if (typeof CpsResult === 'undefined') { CpsResult = function(r) { this.r = r; }; } if (typeof CpsRun === 'undefined') { CpsRun = function(x) { var last_k; while (x instanceof CpsFunction) { last_k = x.k; x = x.f(x.k); } if (x instanceof CpsResult) { return x.r; } else { return last_k.k(x); }}; }");
+  assert.equal(code.type, 'Program');
+  return code.body;
+};
+
+root.function_assignments = []; //TODO
+
+root.new_variable_counter = 1;
 root.generate_new_variable_name = function(prefix, exclude_ids) {
-  var varname = prefix + new_variable_counter++;
+  var varname = prefix + root.new_variable_counter++;
   if (exclude_ids.indexOf(varname) >= 0) {
     return root.generate_new_variable_name(prefix, exclude_ids);
   } else {
@@ -52,24 +73,40 @@ root.generate_new_variable_name = function(prefix, exclude_ids) {
   }
 };
 
-root.ast_func_wrapper = function(varname) {
-  var code = root.parse("var " + varname + " = arguments[arguments.length - 1]; if (" + varname + " instanceof CpsContinuation) { } else { }");
-  assert.equal(code.type, 'Program');
-  assert.equal(code.body.length, 2);
-  return code.body;
-};
-
-root.ast_fix_params = function(params) {
-  var codeStr = 'switch (arguments.length - 1) {';
-  for (var i = 0; i < params.length; i++) {
-    assert.equal(params[i].type, 'Identifier');
-    codeStr += 'case ' + i + ': ' + params[i].name + ' = undefined; break;';
+root.ast_func_header = function(l_varname, a_varname, exclude_ids) {
+  var i_varname = root.generate_new_variable_name('i', exclude_ids);
+  var argsCopy = '';
+  if (a_varname) {
+    argsCopy = "var " + a_varname + " = []; for(var " + i_varname + " = 0; " + i_varname + " <= " + l_varname + "; " + i_varname + "++) { " + a_varname + "[" + i_varname + "] = arguments[" + i_varname + "]; }";
   }
-  codeStr += '}';
-  var code = root.parse(codeStr);
+  var code = root.parse("function ignore() { var " + l_varname + " = arguments.length - 1;" + argsCopy + "}");
   assert.equal(code.type, 'Program');
   assert.equal(code.body.length, 1);
-  return code.body[0];
+  assert.equal(code.body[0].type, 'FunctionDeclaration');
+  assert.equal(code.body[0].body.type, 'BlockStatement');
+  return code.body[0].body.body;
+};
+
+root.ast_func_wrapper = function(k_varname, l_varname , a_varname, params) {
+  var argsPop = '';
+  if (a_varname) {
+    argsPop = a_varname + ".pop();";
+  }
+  var fixParams = '';
+  if (params.length > 0) {
+    fixParams = 'if (' + l_varname + ' >= ' + params.length + ') {';
+    for (var i = params.length - 1; i >= 0; i--) {
+      assert.equal(params[i].type, 'Identifier');
+      fixParams += '} else if (' + l_varname + ' >= ' + i + ') {' + params[i].name + ' = undefined;';
+    }
+    fixParams += '}';
+  }
+  var code = root.parse("function ignore() { var " + k_varname + " = arguments[" + l_varname + "]; if (" + k_varname + " instanceof CpsContinuation) { " + argsPop + fixParams + "}}");
+  assert.equal(code.type, 'Program');
+  assert.equal(code.body.length, 1);
+  assert.equal(code.body[0].type, 'FunctionDeclaration');
+  assert.equal(code.body[0].body.type, 'BlockStatement');
+  return code.body[0].body.body;
 };
 
 root.collect_all_identifiers = function(node) {
@@ -85,16 +122,22 @@ root.collect_all_identifiers = function(node) {
   return ids;
 };
 
-root.check_if_using_arguments = function(node) {
-  if (node && (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression')) {
-    return false;
-  } else if (node && node.type === 'Identifier' && node.name === 'arguments') {
-    return true;
-  } else if (node instanceof Object) {
-    return _.find(node, root.check_if_using_arguments);
-  } else {
-    return false;
-  }
+root.replace_arguments_with = function(body, a_varname) {
+  var using_arguments = false;
+  var walk = function(node) {
+    if (node && (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression')) {
+      return;
+    } else if (node && node.type === 'MemberExpression') {
+      walk(node.object);
+    } else if (node && node.type === 'Identifier' && node.name === 'arguments') {
+      node.name = a_varname;
+      using_arguments = true;
+    } else if (node instanceof Object) {
+      _.each(node, walk);
+    }
+  };
+  walk(body);
+  return using_arguments;
 };
 
 root.deep_clone = function(node) {
@@ -105,31 +148,29 @@ root.deep_clone = function(node) {
 root.transform_function_body = function(params, defaults, body) {
   assert.equal(body.type, 'BlockStatement');
   root.walk_ast(body.body);
-  root.convert_function_declaration_to_expression(body.body);
   var exclude_ids = root.collect_all_identifiers(body.body);
+  var l_varname = root.generate_new_variable_name('l', exclude_ids);
   var k_varname = root.generate_new_variable_name('k', exclude_ids);
-  var wrapper = root.ast_func_wrapper(k_varname);
-  var using_arguments = root.check_if_using_arguments(body.body); //UNUSED
-
-  // continuation call
-  assert.equal(wrapper[1].consequent.type, 'BlockStatement');
+  var a_varname = root.generate_new_variable_name('a', exclude_ids);
+  var using_arguments = root.replace_arguments_with(body.body, a_varname);
+  var header = root.ast_func_header(l_varname, using_arguments && a_varname, exclude_ids);
   var newbody = root.deep_clone(body.body);
   root.convert_function_call_to_new_cps_call(exclude_ids, body.body);
+  root.convert_function_declaration_to_expression(newbody);
   var success = root.convert_normal_body_to_cps_body(k_varname, exclude_ids, newbody);
-  if (!success) {
-    newbody = root.create_fallback_cps_body(k_varname, body.body);
+  if (success) {
+    var wrapper = root.ast_func_wrapper(k_varname, l_varname, using_arguments && a_varname, params);
+    assert.ok(wrapper[1].consequent.body.length >= 0);
+    root.push(wrapper[1].consequent.body, newbody);
+    root.push(wrapper[1].consequent.body, {
+      "type": "ReturnStatement",
+      "argument": null
+    });
+    root.unshift(body.body, wrapper);
+    root.unshift(body.body, header);
+  } else if (using_arguments) {
+    root.unshift(body.body, header);
   }
-  if (params.length > 0) {
-    newbody.unshift(root.ast_fix_params(params));
-  }
-  wrapper[1].consequent.body = newbody;
-
-  // normal call
-  assert.equal(wrapper[1].alternate.type, 'BlockStatement');
-  wrapper[1].alternate.body = body.body;
-
-  // replace
-  body.body = wrapper;
 };
 
 root.convert_function_declaration_to_expression = function(node) {
@@ -219,7 +260,7 @@ root.convert_function_call_to_new_cps_call = function(exclude_ids, body) {
   walk(body);
 };
 
-//XXX so far only converting tail calls to cps
+//XXX so far only converting tail return calls to cps
 root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
   var walk = function(node) {
     if (node && (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression')) {
@@ -307,6 +348,7 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
   return walk(body);
 };
 
+/*
 root.create_fallback_cps_body = function(k_varname, body) {
   return [{
     type: 'ReturnStatement',
@@ -351,6 +393,7 @@ root.create_fallback_cps_body = function(k_varname, body) {
     }
   }];
 };
+*/
 
 root.walk_ast = function(node) {
   if (node && (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression')) {
@@ -363,7 +406,7 @@ root.walk_ast = function(node) {
 root.transform = function(ast) {
   assert.equal(ast.type, 'Program');
   root.walk_ast(ast.body);
-  ast.body.unshift(root.ast_prog_header());
+  root.unshift(ast.body, root.ast_prog_header());
   return ast;
 };
 
