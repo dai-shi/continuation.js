@@ -87,7 +87,7 @@ root.ast_func_header = function(l_varname, a_varname, exclude_ids) {
   return code.body[0].body.body;
 };
 
-root.ast_func_wrapper = function(k_varname, l_varname , a_varname, params) {
+root.ast_func_wrapper = function(k_varname, l_varname, a_varname, params) {
   var argsPop = '';
   if (a_varname) {
     argsPop = a_varname + ".pop();";
@@ -260,50 +260,52 @@ root.convert_function_call_to_new_cps_call = function(exclude_ids, body) {
   walk(body);
 };
 
-//XXX so far only converting tail return calls to cps
+//XXX so far only converting obvious tail calls or return calls to cps
 root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
-  var walk = function(node) {
+  var create_cps_expression = function(call_expression) {
+    var kk_varname = root.generate_new_variable_name('kk', exclude_ids);
+    call_expression.arguments.push({
+      type: 'Identifier',
+      name: kk_varname
+    });
+    return {
+      type: 'NewExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'CpsFunction'
+      },
+      arguments: [{
+        type: 'FunctionExpression',
+        id: null,
+        params: [{
+          type: 'Identifier',
+          name: kk_varname
+        }],
+        defaults: [],
+        body: {
+          type: 'BlockStatement',
+          body: [{
+            type: 'ReturnStatement',
+            argument: call_expression
+          }]
+        },
+        rest: null,
+        generator: false,
+        expression: false
+      }, {
+        type: 'Identifier',
+        name: k_varname
+      }]
+    };
+  };
+  var walk = function(node, tail) {
     if (node && (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression')) {
       return true;
     } else if (node && node.type === 'CallExpression') {
       return false;
     } else if (node && node.type === 'ReturnStatement') {
       if (node.argument && node.argument.type === 'CallExpression') {
-        var kk_varname = root.generate_new_variable_name('kk', exclude_ids);
-        node.argument.arguments.push({
-          type: 'Identifier',
-          name: kk_varname
-        });
-        var newargument = {
-          type: 'NewExpression',
-          callee: {
-            type: 'Identifier',
-            name: 'CpsFunction'
-          },
-          arguments: [{
-            type: 'FunctionExpression',
-            id: null,
-            params: [{
-              type: 'Identifier',
-              name: kk_varname
-            }],
-            defaults: [],
-            body: {
-              type: 'BlockStatement',
-              body: [{
-                type: 'ReturnStatement',
-                argument: node.argument
-              }]
-            },
-            rest: null,
-            generator: false,
-            expression: false
-          }, {
-            type: 'Identifier',
-            name: k_varname
-          }]
-        };
-        node.argument = newargument;
+        node.argument = create_cps_expression(node.argument);
         return true;
       } else {
         var success = walk(node.argument);
@@ -339,13 +341,36 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
           return false;
         }
       }
+    } else if (tail && node && node.type === 'IfStatement') {
+      return walk(node.consequent, tail) && walk(node.alternate, tail);
+    } else if (tail && node && node.type === 'BlockStatement') {
+      return walk(node.body, tail);
+    } else if (tail && Array.isArray(node)) {
+      for (var i = 0; i < node.length - 1; i++) {
+        var result = walk(node[i]);
+        if (!result) {
+          return false;
+        }
+      }
+      var lastone = node[node.length - 1];
+      if (lastone && lastone.type === 'ExpressionStatement' && lastone.expression.type === 'CallExpression') {
+        node[node.length - 1] = {
+          type: 'ReturnStatement',
+          argument: create_cps_expression(lastone.expression)
+        };
+        return true;
+      } else {
+        return walk(lastone, tail);
+      }
     } else if (node instanceof Object) {
-      return _.every(node, walk);
+      return _.every(node, function(x) {
+        return walk(x);
+      });
     } else {
       return true;
     }
   };
-  return walk(body);
+  return walk(body, true);
 };
 
 /*
