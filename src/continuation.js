@@ -36,7 +36,7 @@ root.parse = function(data) {
 };
 
 root.push = function(lst, itm) {
-  if (itm instanceof Array) {
+  if (Array.isArray(itm)) {
     for (var i = 0; i < itm.length; i++) {
       lst.push(itm[i]);
     }
@@ -46,7 +46,7 @@ root.push = function(lst, itm) {
 };
 
 root.unshift = function(lst, itm) {
-  if (itm instanceof Array) {
+  if (Array.isArray(itm)) {
     for (var i = itm.length - 1; i >= 0; i--) {
       lst.unshift(itm[i]);
     }
