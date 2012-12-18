@@ -11,7 +11,7 @@ Continuation support for Node.js
 How to use
 ----------
 
-### From github
+### GitHub
 
     % git clone https://github.com/dai-shi/continuation.js.git
     % ./bin/continuation-compile sample/fact.js > cps_fact.js
@@ -38,6 +38,14 @@ How to use
     % node -e "console.log(require('./cps_fact.js').fact(100000))"
     Infinity
 
+### NPM
+
+    % npm install continuation.js
+
+and add the following:
+
+    require('continuation.js').enable_on_require();
+
 How it works
 ------------
 
@@ -61,14 +69,10 @@ Limitations
 TODOs
 -----
 
-* Integrate with Node.js module system.
+* Work with try...catch
 * Better documents.
 * Transform non-tail calls into CPS.
 * More tests.
 * Avoid duplicating functions.
 * Fix ugly code.
 
-Author
-------
-
-Daishi Kato [@dai_shi](https://twitter.com/dai_shi)

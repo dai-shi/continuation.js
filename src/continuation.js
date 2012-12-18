@@ -506,10 +506,8 @@ root.compile = function(data) {
 root.enable_on_require = function() {
   var fs = require('fs');
   require.extensions['.js'] = function(module, filename) {
-    fs.readFile(filename, 'utf8', function(err, data) {
-      if (err) throw err;
-      module._compile(root.compile(data), filename);
-    });
+    var data = fs.readFileSync(filename, 'utf8');
+    module._compile(root.compile(data), filename);
   };
 };
 
@@ -517,10 +515,8 @@ root.enable_on_require = function() {
 root.disable_on_require = function() {
   var fs = require('fs');
   require.extensions['.js'] = function(module, filename) {
-    fs.readFile(filename, 'utf8', function(err, data) {
-      if (err) throw err;
-      module._compile(data, filename);
-    });
+    var data = fs.readFileSync(filename, 'utf8');
+    module._compile(data, filename);
   };
 };
 
