@@ -4,9 +4,9 @@ continuation.js
 Continuation support for Node.js
 
 * It converts JavaScript code into Continuation Passing Style (CPS) code in a best effort manner.
-* Fallback mechanism when CPS is not possible / not implemented.
+* No new syntax or keyword is required.
+* Fallback mechanism when CPS is not possible or not implemented.
 * Tail calls are properly handled.
-* Passing user-defined continuation is possible (but, it's not a pure continuation).
 
 How to use
 ----------
@@ -16,6 +16,18 @@ How to use
     % git clone https://github.com/dai-shi/continuation.js.git
     % ./bin/continuation-compile sample/fact.js > cps_fact.js
     
+    % cat sample/fact.js
+    function fact(x) {
+      function fact_tail(x, r) {
+        if (x === 0) {
+          return r;
+        } else {
+          return fact_tail(x - 1, x * r);
+        }
+      }
+      return fact_tail(x, 1);
+    }
+
     % node -e "console.log(require('./sample/fact.js').fact(100000))"
     
     .../continuation.js/sample/fact.js:2
@@ -43,7 +55,7 @@ Limitations
 
 * There are some overhead, obviously.
 * Not all calls are transformed into CPS.
-* Arguments objects are handled, but it may causes some problems.
+* Arguments objects are handled, but it may cause some problems.
 * Maybe some more.
 
 TODOs
