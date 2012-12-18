@@ -7,14 +7,25 @@ function fact(x) {
 }
 
 function fact_tail(x) {
-  function fact_tail0(x, r) {
+  function fact_tail_sub(x, r) {
     if (x === 0) {
       return r;
     } else {
-      return fact_tail0(x - 1, x * r);
+      return fact_tail_sub(x - 1, x * r);
     }
   }
-  return fact_tail0(x, 1);
+  return fact_tail_sub(x, 1);
+}
+
+function fact_tail2(x) {
+  var fact_tail2_sub = function(x, r) {
+    if (x === 0) {
+      return r;
+    } else {
+      return fact_tail2_sub(x - 1, x * r);
+    }
+  };
+  return fact_tail2_sub(x, 1);
 }
 
 function dummy() {
