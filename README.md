@@ -6,7 +6,7 @@ Continuation support for Node.js
 * It converts JavaScript code into Continuation Passing Style (CPS) code in a best effort manner.
 * Fallback mechanism when CPS is not possible / not implemented.
 * Tail calls are properly handled.
-* Passing user-defined continuation is possible.
+* Passing user-defined continuation is possible (but, it's not a pure continuation).
 
 How to use
 ----------
@@ -35,7 +35,7 @@ How it works
     * CpsResult
     * CpsRun
 * CPS enabled functions have the CpsEnabled=true property.
-* Traversing AST to transfrom into CPS, only when possible!
+* Traversing AST to transform into CPS, only when possible!
 * Keeping original code so that non-CPS is always possible.
 
 Limitations
