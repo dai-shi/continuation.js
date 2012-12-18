@@ -503,18 +503,31 @@ root.compile = function(data) {
   return root.generate(root.transform(root.parse(data)));
 };
 
-root.compile_on_require = function() {
+root.enable_on_require = function() {
   var fs = require('fs');
   require.extensions['.js'] = function(module, filename) {
     fs.readFile(filename, 'utf8', function(err, data) {
       if (err) throw err;
-      module._compile(root.transform(root.parse(data)), filename);
+      module._compile(root.compile(data), filename);
     });
   };
 };
 
+//XXX not sure if this is really identical to the original function.
+root.disable_on_require = function() {
+  var fs = require('fs');
+  require.extensions['.js'] = function(module, filename) {
+    fs.readFile(filename, 'utf8', function(err, data) {
+      if (err) throw err;
+      module._compile(data, filename);
+    });
+  };
+};
+
+
 exports.compile = root.compile;
-exports.compile_on_require = root.compile_on_require;
+exports.enable_on_require = root.enable_on_require;
+exports.disable_on_require = root.disable_on_require;
 
 if (process.env.NODE_ENV === 'test') {
   exports.parse = root.parse;
