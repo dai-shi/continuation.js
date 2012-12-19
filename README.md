@@ -68,7 +68,7 @@ Limitations
 TODOs
 -----
 
-* Work with try...catch
+* Work with try...catch, throw.
 * Better documents.
 * Transform non-tail calls into CPS.
 * More tests.
