@@ -1,7 +1,7 @@
 {
   "name": "continuation.js",
   "description": "Continuation support for Node.js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Daishi Kato <daishi@axlight.com>",
   "dependencies": {
     "esprima": ">=1.0.2",
@@ -16,6 +16,14 @@
     "type": "git",
     "url": "https://github.com/dai-shi/continuation.js.git"
   },
+  "keywords": [
+    "continuation",
+    "CPS",
+    "tail calls",
+    "TCO",
+    "compile",
+    "AST"
+  ],
   "bin": {
     "continuation-compile": "./bin/continuation-compile"
   },
