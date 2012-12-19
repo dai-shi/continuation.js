@@ -216,10 +216,25 @@ root.transform_function_body = function(params, defaults, body, exclude_ids) {
 };
 
 root.convert_function_call_to_new_cps_call = function(exclude_ids, body) {
+  var has_side_effect = function(node) {
+    if (node && node.type === 'CallExpression') {
+      return true;
+    } else if (node && node.type === 'UpdateExpression') {
+      return true;
+    } else if (node && node.type === 'AssignmentExpression') {
+      return true;
+    } else if (node && node.type === 'NewExpression') {
+      return true;
+    } else if (node instanceof Object) {
+      return _.some(node, has_side_effect);
+    } else {
+      return false;
+    }
+  };
   var walk = function(node) {
     if (node && (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression')) {
       return;
-    } else if (node && node.type === 'CallExpression' && node.callee && !(node.callee.type === 'Identifier' && node.callee.name === 'CpsEnableWrapper')) {
+    } else if (node && node.type === 'CallExpression' && node.callee && !has_side_effect(node.callee) && !(node.callee.type === 'Identifier' && node.callee.name === 'CpsEnableWrapper')) {
       var kk_varname = root.generate_new_variable_name('kk', exclude_ids);
       var cpsnode = root.deep_clone(node);
       cpsnode.arguments.push({

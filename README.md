@@ -68,7 +68,6 @@ Limitations
 TODOs
 -----
 
-* Work with increment expression ex. `i++`
 * Work with try...catch
 * Better documents.
 * Transform non-tail calls into CPS.
