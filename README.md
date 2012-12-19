@@ -5,7 +5,7 @@ Continuation support for Node.js
 
 * It converts JavaScript code into Continuation Passing Style (CPS) code in a best effort manner.
 * No new syntax or keyword is required.
-* Fallback mechanism when CPS is not possible or not implemented.
+* Fallback mechanism works when CPS is not possible or not implemented.
 * Tail calls are properly handled.
 
 How to use
@@ -63,16 +63,16 @@ Limitations
 
 * There are some overhead, obviously.
 * Not all calls are transformed into CPS.
-* Arguments objects are handled, but it may cause some problems.
-* Maybe some more.
+* `new Function` is not supported.
 
 TODOs
 -----
 
+* Work with increment expression ex. `i++`
 * Work with try...catch
 * Better documents.
 * Transform non-tail calls into CPS.
 * More tests.
-* Avoid duplicating functions.
-* Fix ugly code.
+* Avoid duplicating function declarations.
+* Less ugly code.
 

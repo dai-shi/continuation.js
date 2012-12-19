@@ -71,13 +71,17 @@ root.generate_new_variable_name = function(prefix, exclude_ids) {
   }
 };
 
-root.ast_func_header = function(l_varname, a_varname, exclude_ids) {
+root.ast_func_header = function(l_varname, t_varname, a_varname, exclude_ids) {
   var i_varname = root.generate_new_variable_name('i', exclude_ids);
+  var thisCopy = '';
+  if (t_varname) {
+    thisCopy = "var " + t_varname + " = this;";
+  }
   var argsCopy = '';
   if (a_varname) {
     argsCopy = "var " + a_varname + " = {}; for(var " + i_varname + " = 0; " + i_varname + " <= " + l_varname + "; " + i_varname + "++) { " + a_varname + "[" + i_varname + "] = arguments[" + i_varname + "]; }" + a_varname + ".length = 1 + " + l_varname + ";" + a_varname + ".callee = arguments.callee;";
   }
-  var code = root.parse("function ignore() { var " + l_varname + " = arguments.length - 1;" + argsCopy + "}");
+  var code = root.parse("function ignore() { var " + l_varname + " = arguments.length - 1;" + thisCopy + argsCopy + "}");
   assert.equal(code.type, 'Program');
   assert.equal(code.body.length, 1);
   assert.equal(code.body[0].type, 'FunctionDeclaration');
@@ -122,6 +126,23 @@ root.collect_all_identifiers = function(node) {
   return ids;
 };
 
+root.replace_this_var_with = function(body, t_varname) {
+  var using_this_var = false;
+  var walk = function(node) {
+    if (node && (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression')) {
+      return;
+    } else if (node && node.type === 'ThisExpression') {
+      node.type = 'Identifier';
+      node.name = t_varname;
+      using_this_var = true;
+    } else if (node instanceof Object) {
+      _.each(node, walk);
+    }
+  };
+  walk(body);
+  return using_this_var;
+};
+
 root.replace_arguments_with = function(body, a_varname) {
   var using_arguments = false;
   var walk = function(node) {
@@ -143,18 +164,35 @@ root.replace_arguments_with = function(body, a_varname) {
 };
 
 root.deep_clone = function(node) {
-  //FIXME this must be too slow
-  return JSON.parse(JSON.stringify(node));
+  if (node instanceof Date) {
+    return node;
+  } else if (node instanceof RegExp) {
+    return node;
+  } else if (Array.isArray(node)) {
+    return _.map(node, root.deep_clone);
+  } else if (node instanceof Object) {
+    return _.object(_.map(_.pairs(node), function(x) {
+      return [x[0], root.deep_clone(x[1])];
+    }));
+  } else {
+    return node;
+  }
 };
 
 root.transform_function_body = function(params, defaults, body, exclude_ids) {
   assert.equal(body.type, 'BlockStatement');
+  if (body.body.length === 0) {
+    // we should not transform empty functions
+    return false;
+  }
   var cps_func_ids = root.walk_ast(body.body);
   var l_varname = root.generate_new_variable_name('l', exclude_ids);
   var k_varname = root.generate_new_variable_name('k', exclude_ids);
+  var t_varname = root.generate_new_variable_name('t', exclude_ids);
   var a_varname = root.generate_new_variable_name('a', exclude_ids);
+  var using_this_var = root.replace_this_var_with(body.body, t_varname);
   var using_arguments = root.replace_arguments_with(body.body, a_varname);
-  var header = root.ast_func_header(l_varname, using_arguments && a_varname, exclude_ids);
+  var header = root.ast_func_header(l_varname, using_this_var && t_varname, using_arguments && a_varname, exclude_ids);
   var newbody = root.deep_clone(body.body);
   root.convert_function_call_to_new_cps_call(exclude_ids, body.body);
   var success = root.convert_normal_body_to_cps_body(k_varname, exclude_ids, newbody);
@@ -168,7 +206,7 @@ root.transform_function_body = function(params, defaults, body, exclude_ids) {
     });
     root.unshift(body.body, wrapper);
     root.unshift(body.body, header);
-  } else if (using_arguments) {
+  } else if (using_this_var || using_arguments) {
     root.unshift(body.body, header);
   }
   _.each(_.flatten(cps_func_ids), function(cps_func_id) {
