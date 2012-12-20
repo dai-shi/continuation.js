@@ -74,6 +74,5 @@ TODOs
 * Better documents.
 * Transform non-tail calls into CPS.
 * More tests.
-* Avoid duplicating function declarations.
 * Support for current continuations (feasible?)
 
