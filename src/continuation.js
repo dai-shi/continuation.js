@@ -45,13 +45,19 @@ root.push = function(lst, itm) {
   }
 };
 
-root.unshift = function(lst, itm) {
+root.unshift = function(lst, itm, force) {
   if (Array.isArray(itm)) {
-    for (var i = itm.length - 1; i >= 0; i--) {
-      lst.unshift(itm[i]);
-    }
+    itm = itm.reverse();
   } else {
-    lst.unshift(itm);
+    itm = [itm];
+  }
+  if (!force) {
+    while (lst.length > 0 && lst[0].type === 'FunctionDeclaration') {
+      itm.push(lst.shift());
+    }
+  }
+  for (var i = 0; i < itm.length; i++) {
+    lst.unshift(itm[i]);
   }
 };
 
@@ -81,12 +87,9 @@ root.ast_func_header = function(l_varname, t_varname, a_varname, exclude_ids) {
   if (a_varname) {
     argsCopy = "var " + a_varname + " = {}; for(var " + i_varname + " = 0; " + i_varname + " <= " + l_varname + "; " + i_varname + "++) { " + a_varname + "[" + i_varname + "] = arguments[" + i_varname + "]; }" + a_varname + ".length = 1 + " + l_varname + ";" + a_varname + ".callee = arguments.callee;";
   }
-  var code = root.parse("function ignore() { var " + l_varname + " = arguments.length - 1;" + thisCopy + argsCopy + "}");
+  var code = root.parse("var " + l_varname + " = arguments.length - 1;" + thisCopy + argsCopy);
   assert.equal(code.type, 'Program');
-  assert.equal(code.body.length, 1);
-  assert.equal(code.body[0].type, 'FunctionDeclaration');
-  assert.equal(code.body[0].body.type, 'BlockStatement');
-  return code.body[0].body.body;
+  return code.body;
 };
 
 root.ast_func_wrapper = function(k_varname, l_varname, a_varname, params) {
@@ -103,12 +106,9 @@ root.ast_func_wrapper = function(k_varname, l_varname, a_varname, params) {
     }
     fixParams += '}';
   }
-  var code = root.parse("function ignore() { var " + k_varname + " = arguments[" + l_varname + "]; if (" + k_varname + " instanceof CpsContinuation) { " + argsPop + fixParams + "}}");
+  var code = root.parse("var " + k_varname + " = arguments[" + l_varname + "]; if (" + k_varname + " instanceof CpsContinuation) { " + argsPop + fixParams + "}");
   assert.equal(code.type, 'Program');
-  assert.equal(code.body.length, 1);
-  assert.equal(code.body[0].type, 'FunctionDeclaration');
-  assert.equal(code.body[0].body.type, 'BlockStatement');
-  return code.body[0].body.body;
+  return code.body;
 };
 
 root.collect_all_identifiers = function(node) {
@@ -194,9 +194,18 @@ root.transform_function_body = function(params, defaults, body, exclude_ids) {
   var using_arguments = root.replace_arguments_with(body.body, a_varname);
   var header = root.ast_func_header(l_varname, using_this_var && t_varname, using_arguments && a_varname, exclude_ids);
   var newbody = root.deep_clone(body.body);
-  root.convert_function_call_to_new_cps_call(exclude_ids, body.body);
+  root.convert_function_call_to_new_cps_call(body.body, exclude_ids);
   var success = root.convert_normal_body_to_cps_body(k_varname, exclude_ids, newbody);
   if (success) {
+    var index = 0;
+    while (newbody.length > 0) {
+      if (newbody[0].type === 'FunctionDeclaration') {
+        newbody.shift();
+        index++;
+      } else {
+        break;
+      }
+    }
     var wrapper = root.ast_func_wrapper(k_varname, l_varname, using_arguments && a_varname, params);
     assert.ok(wrapper[1].consequent.body.length >= 0);
     root.push(wrapper[1].consequent.body, newbody);
@@ -215,7 +224,7 @@ root.transform_function_body = function(params, defaults, body, exclude_ids) {
   return success;
 };
 
-root.convert_function_call_to_new_cps_call = function(exclude_ids, body) {
+root.convert_function_call_to_new_cps_call = function(body, exclude_ids) {
   var has_side_effect = function(node) {
     if (node && node.type === 'CallExpression') {
       return true;
@@ -544,7 +553,7 @@ root.transform = function(ast) {
   _.each(_.flatten(cps_func_ids), function(cps_func_id) {
     root.unshift(ast.body, root.create_cpsenabled_statement(cps_func_id));
   });
-  root.unshift(ast.body, root.ast_prog_header());
+  root.unshift(ast.body, root.ast_prog_header(), true);
   return ast;
 };
 

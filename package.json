@@ -10,7 +10,9 @@
   },
   "devDependencies": {
     "mocha": "*",
-    "jshint": "*"
+    "jshint": "*",
+    "benchmark": "*",
+    "benmkzoo": "*"
   },
   "repository": {
     "type": "git",
@@ -18,11 +20,12 @@
   },
   "keywords": [
     "continuation",
-    "CPS",
+    "cps",
     "tail calls",
-    "TCO",
-    "compile",
-    "AST"
+    "tco",
+    "compiler",
+    "ast",
+    "require"
   ],
   "bin": {
     "continuation-compile": "./bin/continuation-compile"

@@ -3,7 +3,7 @@ continuation.js
 
 Continuation support for Node.js
 
-* It converts JavaScript code into Continuation Passing Style (CPS) code in a best effort manner.
+* It transforms JavaScript code into Continuation Passing Style (CPS) code in a best effort manner.
 * No new syntax or keyword is required.
 * Fallback mechanism works when CPS is not possible or not implemented.
 * Tail calls are properly handled.
@@ -46,6 +46,8 @@ and add the following:
 
     require('continuation.js').enable_on_require();
 
+which transforms all following .js files by `require`.
+
 How it works
 ------------
 
@@ -68,10 +70,10 @@ Limitations
 TODOs
 -----
 
-* Work with try...catch, throw.
+* Work with try...catch and throw.
 * Better documents.
 * Transform non-tail calls into CPS.
 * More tests.
 * Avoid duplicating function declarations.
-* Less ugly code.
+* Support for current continuations (feasible?)
 
