@@ -197,11 +197,9 @@ root.transform_function_body = function(params, defaults, body, exclude_ids) {
   root.convert_function_call_to_new_cps_call(body.body, exclude_ids);
   var success = root.convert_normal_body_to_cps_body(k_varname, exclude_ids, newbody);
   if (success) {
-    var index = 0;
     while (newbody.length > 0) {
       if (newbody[0].type === 'FunctionDeclaration') {
         newbody.shift();
-        index++;
       } else {
         break;
       }
@@ -226,13 +224,15 @@ root.transform_function_body = function(params, defaults, body, exclude_ids) {
 
 root.convert_function_call_to_new_cps_call = function(body, exclude_ids) {
   var has_side_effect = function(node) {
-    if (node && node.type === 'CallExpression') {
+    if (!node) {
+      return false;
+    } else if (node.type === 'CallExpression') {
       return true;
-    } else if (node && node.type === 'UpdateExpression') {
+    } else if (node.type === 'UpdateExpression') {
       return true;
-    } else if (node && node.type === 'AssignmentExpression') {
+    } else if (node.type === 'AssignmentExpression') {
       return true;
-    } else if (node && node.type === 'NewExpression') {
+    } else if (node.type === 'NewExpression') {
       return true;
     } else if (node instanceof Object) {
       return _.some(node, has_side_effect);
@@ -240,10 +240,23 @@ root.convert_function_call_to_new_cps_call = function(body, exclude_ids) {
       return false;
     }
   };
+  var is_transformable_call = function(node) {
+    if (!node.callee) {
+      return false;
+    } else if (has_side_effect(node.callee)) {
+      return false;
+    } else if (node.callee.type === 'Identifier' && node.callee.name === 'CpsEnableWrapper') {
+      return false;
+    } else if (node.callee.type === 'MembershipExpression' && node.callee.property.type === 'Identifier' && node.callee.property.name === 'apply') {
+      return false;
+    } else {
+      return true;
+    }
+  };
   var walk = function(node) {
     if (node && (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression')) {
       return;
-    } else if (node && node.type === 'CallExpression' && node.callee && !has_side_effect(node.callee) && !(node.callee.type === 'Identifier' && node.callee.name === 'CpsEnableWrapper')) {
+    } else if (node && node.type === 'CallExpression' && is_transformable_call(node)) {
       var kk_varname = root.generate_new_variable_name('kk', exclude_ids);
       var cpsnode = root.deep_clone(node);
       cpsnode.arguments.push({
