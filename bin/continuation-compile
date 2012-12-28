@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var fs = require('fs');
-var continuation = require('../lib/continuation');
+var continuation = require('../lib/continuation.js');
 
 if (process.argv.length !== 3) {
   console.log('Usage: $0 <filename>');
