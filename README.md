@@ -14,6 +14,7 @@ How to use
 ### GitHub
 
     % git clone https://github.com/dai-shi/continuation.js.git
+    % cd continuation.js
     % ./bin/continuation-compile sample/fact.js > cps_fact.js
     
     % cat sample/fact.js
