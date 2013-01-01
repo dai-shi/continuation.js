@@ -12,6 +12,7 @@
     "mocha": "*",
     "jshint": "*",
     "benchmark": "*",
+    "benchmark-octane": "*",
     "benmkzoo": "*"
   },
   "repository": {
