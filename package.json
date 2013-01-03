@@ -1,7 +1,7 @@
 {
   "name": "continuation.js",
   "description": "Continuation support for Node.js",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "Daishi Kato <daishi@axlight.com>",
   "dependencies": {
     "esprima": ">=1.0.2",
@@ -11,7 +11,7 @@
   "devDependencies": {
     "mocha": "*",
     "jshint": "*",
-    "benchmark": "*",
+    "benchmark": "https://github.com/bestiejs/benchmark.js/tarball/master",
     "benchmark-octane": "*",
     "benmkzoo": "*"
   },
