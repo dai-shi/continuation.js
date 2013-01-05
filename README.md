@@ -13,11 +13,11 @@ Comparison
 
 Here is the table showing related projects.
 
-| NAME              | continuation.js | [Continuation][1] | [Brushtail][2] | [Cinch][3]   |
-|-------------------|-----------------|-------------------|----------------|--------------|
-| TCO               | Yes             | Yes               | Yes            | No           |
-| CPS               | Yes             | Yes               | No             | Yes          |
-| Native JavaScript | Yes             | No                | Yes            | Yes (almost) |
+| NAME                   | continuation.js | [Continuation][1] | [Brushtail][2] | [Cinch][3]   |
+|------------------------|-----------------|-------------------|----------------|--------------|
+| Tail Call Optimization | Yes             | Yes               | Yes            | No           |
+| CPS                    | Yes             | Yes               | No             | Yes          |
+| Native JavaScript      | Yes             | No                | Yes            | Yes (almost) |
 
 [1]: https://github.com/BYVoid/continuation "BYVoid/continuation"
 [2]: https://github.com/pufuwozu/brushtail "pufuwozu/brushtail"
