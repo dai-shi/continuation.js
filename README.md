@@ -8,6 +8,21 @@ Continuation support for Node.js
 * Fallback mechanism works when CPS is not possible or not implemented.
 * Tail calls are properly handled.
 
+Comparison
+----------
+
+Here is the table showing related projects.
+
+| NAME              | continuation.js | [Continuation][1] | [Brushtail][2] | [Cinch][3]   |
+|-------------------|-----------------|-------------------|----------------|--------------|
+| TCO               | Yes             | Yes               | Yes            | No           |
+| CPS               | Yes             | Yes               | No             | Yes          |
+| Native JavaScript | Yes             | No                | Yes            | Yes (almost) |
+
+[1]: https://github.com/BYVoid/continuation "BYVoid/continuation"
+[2]: https://github.com/pufuwozu/brushtail "pufuwozu/brushtail"
+[3]: https://github.com/pguillory/cinch "pguillory/cinch"
+
 How to use
 ----------
 
