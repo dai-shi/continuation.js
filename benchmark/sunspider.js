@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+var argv = process.argv.slice(2);
+
 var benchmark = require('benchmark');
 var _ = require('underscore');
 var continuation = require('../src/continuation.js');
@@ -16,6 +18,9 @@ continuation.disable_on_require();
 var suite = new benchmark.Suite();
 
 for (var test in benmkzoo.sunspider) {
+  if (argv.length > 0 && _.indexOf(argv, benmkzoo.sunspider[test].name) === -1) {
+    continue;
+  }
   suite.push(new benchmark(benmkzoo.sunspider[test]));
   var cps_test = cps_benmkzoo.sunspider[test];
   cps_test.name = 'cps_' + cps_test.name;
