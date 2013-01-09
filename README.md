@@ -26,7 +26,7 @@ Here is the table showing related projects.
 
 | NAME                    | continuation.js | [Continuation][1] | [Brushtail][2] | [Cinch][3] |
 |-------------------------|-----------------|-------------------|----------------|----------------|
-| CPS                     | Mostly          | Callback style    | No             | Callback style |
+| CPS transformation      | Mostly          | Callback style    | No             | Callback style |
 | Tail Call Optimization  | Yes             | No                | Yes            | No             |
 | Native JavaScript       | Yes             | No                | Yes            | Almost         |
 | `require()` integration | Yes             | Yes               | No             | Yes            |
