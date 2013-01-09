@@ -1,24 +1,35 @@
 continuation.js
 ===============
 
-Continuation support for Node.js
+CPS transformer with trampoline technique for Node.js
 
-* It transforms JavaScript code into Continuation Passing Style (CPS) code in a best effort manner.
-* No new syntax or keyword is required.
-* Fallback mechanism works when CPS is not possible or not implemented.
-* Tail calls are properly handled.
+JavaScript is a nice programming language, but compared to Scheme,
+it lacks the tail call optimization.
+Node.js is often used with Callback Passing Style (CPS) programming,
+but with a typical function call style.
+
+This module allows to transform native JavaScript code into
+Continuation Passing Style (CPS) code in a best effort manner.
+It utilizes so-called trampoline technique to avoid the stack overflow error.
+Transforming all function into CPS is tremendously hard,
+hence it has a fallback mechanism, that is, only supported
+function style is transformed into CPS and other functions are
+called in an original style.
+
+It is only tested with Node.js, but could be usable
+with other JavaScript engines.
 
 Comparison
 ----------
 
 Here is the table showing related projects.
 
-| NAME                    | continuation.js | [Continuation][1] | [Brushtail][2] | [Cinch][3]   |
-|-------------------------|-----------------|-------------------|----------------|---------------------|
-| Tail Call Optimization  | Yes             | Yes               | Yes            | No                  |
-| CPS                     | Yes             | Yes               | No             | Yes (no trampoline) |
-| Native JavaScript       | Yes             | No                | Yes            | Yes (almost)        |
-| `require()` integration | Yes             | Yes               | No             | Yes                 |
+| NAME                    | continuation.js | [Continuation][1] | [Brushtail][2] | [Cinch][3] |
+|-------------------------|-----------------|-------------------|----------------|----------------|
+| CPS                     | Mostly          | Callback style    | No             | Callback style |
+| Tail Call Optimization  | Yes             | No                | Yes            | No             |
+| Native JavaScript       | Yes             | No                | Yes            | Almost         |
+| `require()` integration | Yes             | Yes               | No             | Yes            |
 
 [1]: https://github.com/BYVoid/continuation "BYVoid/continuation"
 [2]: https://github.com/pufuwozu/brushtail "pufuwozu/brushtail"
