@@ -11,8 +11,7 @@ but with a typical function call style.
 This module allows to transform native JavaScript code into
 Continuation Passing Style (CPS) code in a best effort manner.
 It utilizes so-called trampoline technique to avoid the stack overflow error.
-Transforming all function into CPS is tremendously hard
-(or more precisely, inefficient),
+Transforming all function into CPS is not very easy,
 hence it has a fallback mechanism, that is, only supported
 function style is transformed into CPS and other functions are
 called in an original style.
