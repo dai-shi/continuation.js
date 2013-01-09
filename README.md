@@ -24,7 +24,7 @@ Comparison
 
 Here is the table showing related projects.
 
-| NAME                    | continuation.js | [Continuation][1] | [Brushtail][2] | [Cinch][3] |
+| NAME                    | continuation.js | [Continuation][1] | [Brushtail][2] | [Cinch][3]     |
 |-------------------------|-----------------|-------------------|----------------|----------------|
 | CPS transformation      | Mostly          | Callback style    | No             | Callback style |
 | Tail Call Optimization  | Yes             | No                | Yes            | No             |
