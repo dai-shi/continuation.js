@@ -553,6 +553,9 @@ root.walk_ast = function(node) {
       _.extend(node, newnode);
     }
     return [];
+  } else if (node && node.type === 'CallExpression') {
+    // ignore functions in CallExpression
+    return [];
   } else if (node instanceof Object) {
     return _.map(node, root.walk_ast);
   } else {
