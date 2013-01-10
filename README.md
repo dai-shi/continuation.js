@@ -5,16 +5,19 @@ CPS transformer with trampoline technique for Node.js
 
 JavaScript is a nice programming language, but compared to Scheme,
 it lacks the tail call optimization.
-Node.js is often used with Callback Passing Style (CPS) programming,
-but with a typical function call style.
+Node.js is often used with Callback Passing Style programming
+without tail call optimization.
 
 This module allows to transform native JavaScript code into
 Continuation Passing Style (CPS) code in a best effort manner.
 It utilizes so-called trampoline technique to avoid the stack overflow error.
-Transforming all function into CPS is not very easy,
+Transforming all function into CPS is not very easy
+(and sometimes not very efficient),
 hence it has a fallback mechanism, that is, only supported
 function style is transformed into CPS and other functions are
 called in an original style.
+Because of the fallback mechanism, mixing CPS code and non-CPS code
+is possible.
 
 It is only tested with Node.js, but could be usable
 with other JavaScript engines.

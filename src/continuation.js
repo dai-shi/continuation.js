@@ -226,6 +226,8 @@ root.convert_function_call_to_new_cps_call = function(body, exclude_ids) {
   var has_side_effect = function(node) {
     if (!node) {
       return false;
+    } else if (node.type === 'FunctionExpression') { //not really side-effect
+      return true;
     } else if (node.type === 'CallExpression') {
       return true;
     } else if (node.type === 'UpdateExpression') {
@@ -331,7 +333,32 @@ root.convert_function_call_to_new_cps_call = function(body, exclude_ids) {
   walk(body);
 };
 
-//XXX so far only converting obvious tail calls or return calls to cps
+root.convert_statements_into_cps = function(k_varname, exclude_ids, statements) {
+  var i = 0;
+  while (i < statements.length) {
+    assert.ok(statements[i].type);
+    assert.equal(statements[i].type.slice(-9), 'Statement');
+    var converted = root.convert_statement_into_cps(k_varname, exclude_ids, statements[i], statements.slice(i + 1));
+    if (converted) {
+      statements.splice(i + 1);
+      statements[i] = {
+        type: 'ReturnStatement',
+        argument: converted
+      };
+      break;
+    }
+  }
+};
+
+root.convert_statement_into_cps = function(k_varname, exlude_ids, statement, rest) {
+  if (statement.type === 'ExpressionStatement') {
+    //TODO
+  } else {
+    return false;
+  }
+};
+
+// only converting obvious tail calls or return calls to cps
 root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
   var create_cps_expression = function(call_expression) {
     var kk_varname = root.generate_new_variable_name('kk', exclude_ids);
@@ -390,7 +417,7 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
     } else if (node && node.type === 'CallExpression' && !(node.callee && node.callee.id && node.callee.id.type === 'Identifier' && node.callee.id.name === 'CpsEnableWrapper')) {
       return false;
     } else if (node && node.type === 'ReturnStatement') {
-      if (node.argument && node.argument.type === 'CallExpression') {
+      if (node.argument && node.argument.type === 'CallExpression' && !(node.argument.callee && node.argument.callee.type === 'FunctionExpression')) {
         node.argument = create_cps_expression(node.argument);
         return true;
       } else {
@@ -439,7 +466,7 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
         }
       }
       var lastone = node[node.length - 1];
-      if (lastone && lastone.type === 'ExpressionStatement' && lastone.expression.type === 'CallExpression') {
+      if (lastone && lastone.type === 'ExpressionStatement' && lastone.expression.type === 'CallExpression' && !(lastone.expression.callee && lastone.expression.callee.type === 'FunctionExpression')) {
         node[node.length - 1] = {
           type: 'ReturnStatement',
           argument: create_cps_expression(lastone.expression)
