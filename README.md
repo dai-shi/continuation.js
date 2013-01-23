@@ -19,8 +19,8 @@ called in an original style.
 Because of the fallback mechanism, mixing CPS code and non-CPS code
 is possible.
 
-It is only tested with Node.js, but could be usable
-with other JavaScript engines.
+It is only tested with Node.js, but might be usable
+with other JavaScript engines with minor modifications.
 
 Comparison
 ----------
@@ -46,7 +46,20 @@ How to use
     % git clone https://github.com/dai-shi/continuation.js.git
     % cd continuation.js
     % ./bin/continuation-compile sample/fact.js > cps_fact.js
-    
+
+### NPM
+
+    % npm install continuation.js
+
+and add the following:
+
+    require('continuation.js').enable_on_require();
+
+which transforms all following .js files by `require`.
+
+Examples
+--------
+
     % cat sample/fact.js
     function fact(x) {
       function fact_tail(x, r) {
@@ -59,6 +72,8 @@ How to use
       return fact_tail(x, 1);
     }
 
+    exports.fact = fact;
+
     % node -e "console.log(require('./sample/fact.js').fact(100000))"
     
     .../continuation.js/sample/fact.js:2
@@ -66,18 +81,38 @@ How to use
                             ^
     RangeError: Maximum call stack size exceeded
     
-    % node -e "console.log(require('./cps_fact.js').fact(100000))"
+    % node -e "require('./lib/continuation.js').enable_on_require();console.log(require('./sample/fact.js').fact(100000))"
     Infinity
 
-### NPM
 
-    % npm install continuation.js
+    % cat sample/mutual.js
+    function isEven(x) {
+      if (x === 0) {
+        return true;
+      } else {
+        return isOdd(x - 1);
+      }
+    }
 
-and add the following:
+    function isOdd(x) {
+      if (x === 0) {
+        return false;
+      } else {
+        return isEven(x - 1);
+      }
+    }
 
-    require('continuation.js').enable_on_require();
+    exports.isEven = isEven;
+    exports.isOdd = isOdd;
 
-which transforms all following .js files by `require`.
+    % node -e "console.log(require('./sample/mutual.js').isOdd(1234567))"
+
+    .../sample/mutual.js:1
+    tion isEven(x) {
+           ^
+    RangeError: Maximum call stack size exceeded
+    % node -e "require('./lib/continuation.js').enable_on_require();console.log(require('./sample/mutual.js').isOdd(1234567))"
+    true
 
 How it works
 ------------
@@ -91,10 +126,33 @@ How it works
 * Traversing AST to transform into CPS, only when possible!
 * Keeping original code so that non-CPS is always possible.
 
+Benchmark results
+-----------------
+
+The following is the results of Octane benchmark suites (except for one).
+
+| Suite name      | Original      | CPS transformed | Improved? |
+|-----------------|---------------|-----------------|-----------|
+| Richards        | 370 ops/sec   | 16.90 ops/sec   | No        |
+| DeltaBlue       | 178 ops/sec   | 6.24 ops/sec    | No        |
+| Encrypt         | 171 ops/sec   | 79.93 ops/sec   | No        |
+| Decrypt         | 9.23 ops/sec  | 3.65 ops/sec    | No        |
+| RayTrace        | 19.82 ops/sec | 2.23 ops/sec    | No        |
+| Earley          | 268 ops/sec   | 20.77 ops/sec   | No        |
+| Boyer           | 19.01 ops/sec | 2.14 ops/sec    | No        |
+| RegExp          | 7.20 ops/sec  | 5.00 ops/sec    | No        |
+| Splay           | 116 ops/sec   | 69.90 ops/sec   | No        |
+| NavierStokes    | 2.57 ops/sec  | 2.43 ops/sec    | No        |
+| PdfJS           | 2.67 ops/sec  | 2.49 ops/sec    | No        |
+| Gameboy         | 0.99 ops/sec  | 0.28 ops/sec    | No        |
+| CodeLoadClosure | 343 ops/sec   | 392 ops/sec     | Yes       |
+| CodeLoadJQuery  | 10.23 ops/sec | 10.36 ops/sec   | Yes       |
+| Box2D           | 2.28 ops/sec  | 2.48 ops/sec    | Yes       |
+
+
 Limitations
 -----------
 
-* There are some overhead, obviously.
 * Not all calls are transformed into CPS.
 * `new Function` is not supported.
 * First-class continuation is not supported.
@@ -103,8 +161,4 @@ TODOs
 -----
 
 * Work with try...catch and throw.
-* Better documents.
 * Transform non-tail calls into CPS.
-* More tests.
-* Support for current continuations (feasible?)
-
