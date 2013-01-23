@@ -1,7 +1,7 @@
 {
   "name": "continuation.js",
   "description": "CPS transformer with trampoline technique for Node.js",
-  "version": "0.0.11",
+  "version": "0.1.0",
   "author": "Daishi Kato <daishi@axlight.com>",
   "dependencies": {
     "esprima": ">=1.0.2",
