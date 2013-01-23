@@ -20,7 +20,7 @@ Because of the fallback mechanism, mixing CPS code and non-CPS code
 is possible.
 
 It is only tested with Node.js, but might be usable
-with other JavaScript engines with minor modifications.
+with other JavaScript engines.
 
 Comparison
 ----------
@@ -60,6 +60,8 @@ which transforms all following .js files by `require`.
 Examples
 --------
 
+Simple factorial function:
+
     % cat sample/fact.js
     function fact(x) {
       function fact_tail(x, r) {
@@ -84,6 +86,7 @@ Examples
     % node -e "require('./lib/continuation.js').enable_on_require();console.log(require('./sample/fact.js').fact(100000))"
     Infinity
 
+Mutual recursion example:
 
     % cat sample/mutual.js
     function isEven(x) {
