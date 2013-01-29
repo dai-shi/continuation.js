@@ -22,7 +22,7 @@
   "keywords": [
     "continuation",
     "cps",
-    "tail calls",
+    "tail-call",
     "tco",
     "compiler",
     "ast",
