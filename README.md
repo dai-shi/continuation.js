@@ -1,16 +1,17 @@
 continuation.js
 ===============
 
-CPS transformer with trampoline technique for Node.js
+A module for tail call optimization by Continuation Passing Style (CPS)
+transformation with trampoline technique for Node.js
 
 JavaScript is a nice programming language, but compared to Scheme,
-it lacks the tail call optimization.
-Node.js is often used with Callback Passing Style programming
-without tail call optimization.
+it doesn't handle tail calls properly.
+Node.js is often used with callback functions,
+which tend to be tail calls (but not necessarily recursions).
 
 This module allows to transform native JavaScript code into
-Continuation Passing Style (CPS) code in a best effort manner.
-It utilizes so-called trampoline technique to avoid the stack overflow error.
+CPS code in a best effort manner.
+It utilizes so-called trampoline technique to avoid a stack overflow error.
 Transforming all function into CPS is not very easy
 (and sometimes not very efficient),
 hence it has a fallback mechanism, that is, only supported
@@ -19,24 +20,22 @@ called in an original style.
 Because of the fallback mechanism, mixing CPS code and non-CPS code
 is possible.
 
-It is only tested with Node.js, but might be usable
-with other JavaScript engines.
-
 Comparison
 ----------
 
-Here is the table showing related projects.
+Here is the table showing modules that support tail call optimization.
 
-| NAME                    | continuation.js | [Continuation][1] | [Brushtail][2] | [Cinch][3]     |
-|-------------------------|-----------------|-------------------|----------------|----------------|
-| CPS transformation      | Mostly          | Callback style    | No             | Callback style |
-| Tail Call Optimization  | Yes             | No                | Yes            | No             |
-| Native JavaScript       | Yes             | No                | Yes            | Almost         |
-| `require()` integration | Yes             | Yes               | No             | Yes            |
+| NAME                    | continuation.js | [Brushtail][1] | [tailrec.js][2] | [thunk.js][3] | [tail-call][4] |
+|-------------------------|-----------------|----------------|-----------------|---------------|----------------|
+| Tail Call Optimization  | Yes             | Yes            | Yes             | Yes           | Yes            |
+| Mutual TCO              | Yes             | No             | Yes             | No            | No             |
+| Native JavaScript       | Yes             | Yes            | No              | No            | Almost         |
+| `require()` integration | Yes             | No             | No              | No            | No             |
 
-[1]: https://github.com/BYVoid/continuation "BYVoid/continuation"
-[2]: https://github.com/pufuwozu/brushtail "pufuwozu/brushtail"
-[3]: https://github.com/pguillory/cinch "pguillory/cinch"
+[1]: https://github.com/pufuwozu/brushtail "pufuwozu/brushtail"
+[2]: https://github.com/natefaubion/tailrec.js "natefaubion/tailrec.js"
+[3]: https://github.com/jayferd/thunk.js "jayferd/thunk.js"
+[4]: https://github.com/Gozala/js-tail-call "Gozala/js-tail-call"
 
 How to use
 ----------
@@ -126,7 +125,7 @@ How it works
     * CpsResult
     * CpsRun
 * CPS enabled functions have the CpsEnabled=true property.
-* Traversing AST to transform into CPS, only when possible!
+* Traversing AST to transform into CPS in a best effort manner.
 * Keeping original code so that non-CPS is always possible.
 
 Benchmark results
@@ -163,5 +162,6 @@ Limitations
 TODOs
 -----
 
+* Transform all tail recursive calls into CPS.
 * Work with try...catch and throw.
-* Transform non-tail calls into CPS.
+* Transform non-tail recursive calls into CPS.
