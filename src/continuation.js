@@ -62,9 +62,9 @@ root.unshift = function(lst, itm, force) {
 };
 
 root.ast_prog_header = function() {
-  var code = root.parse("if (typeof CpsFunction === 'undefined') { CpsFunction = function(f, k) { this.f = f; this.k = k; }; } if (typeof CpsContinuation === 'undefined') { CpsContinuation = function(k) { if (k) { this.k = k; } else { this.k = function(r) { return r; }; }}; } if (typeof CpsResult === 'undefined') { CpsResult = function(r) { this.r = r; }; } if (typeof CpsRun === 'undefined') { CpsRun = function(x) { var last_k; while (x instanceof CpsFunction) { last_k = x.k; x = x.f(x.k); } if (x instanceof CpsResult) { return x.r; } else { return last_k.k(x); }}; }");
-  assert.equal(code.type, 'Program');
-  return code.body;
+  var ast = root.parse("if (typeof CpsFunction === 'undefined') { CpsFunction = function(f, k) { this.f = f; this.k = k; }; } if (typeof CpsContinuation === 'undefined') { CpsContinuation = function(k) { if (k) { this.k = k; } else { this.k = function(r) { return r; }; }}; } if (typeof CpsResult === 'undefined') { CpsResult = function(r) { this.r = r; }; } if (typeof CpsRun === 'undefined') { CpsRun = function(x) { var last_k; while (x instanceof CpsFunction) { last_k = x.k; x = x.f(x.k); } if (x instanceof CpsResult) { return x.r; } else { return last_k.k(x); }}; }");
+  assert.equal(ast.type, 'Program');
+  return ast.body;
 };
 
 root.new_variable_counter = 1;
@@ -79,36 +79,35 @@ root.generate_new_variable_name = function(prefix, exclude_ids) {
 
 root.ast_func_header = function(l_varname, t_varname, a_varname, exclude_ids) {
   var i_varname = root.generate_new_variable_name('i', exclude_ids);
-  var thisCopy = '';
+  var code = "var " + l_varname + " = arguments.length - 1;";
   if (t_varname) {
-    thisCopy = "var " + t_varname + " = this;";
+    code += "var " + t_varname + " = this;";
   }
-  var argsCopy = '';
   if (a_varname) {
-    argsCopy = "var " + a_varname + " = {}; for(var " + i_varname + " = 0; " + i_varname + " <= " + l_varname + "; " + i_varname + "++) { " + a_varname + "[" + i_varname + "] = arguments[" + i_varname + "]; }" + a_varname + ".length = 1 + " + l_varname + ";" + a_varname + ".callee = arguments.callee;";
+    code += "var " + a_varname + " = {}; for(var " + i_varname + " = 0; " + i_varname + " <= " + l_varname + "; " + i_varname + "++) { " + a_varname + "[" + i_varname + "] = arguments[" + i_varname + "]; }" + a_varname + ".length = 1 + " + l_varname + ";" + a_varname + ".callee = arguments.callee;";
   }
-  var code = root.parse("var " + l_varname + " = arguments.length - 1;" + thisCopy + argsCopy);
-  assert.equal(code.type, 'Program');
-  return code.body;
+  var ast = root.parse(code);
+  assert.equal(ast.type, 'Program');
+  return ast.body;
 };
 
 root.ast_func_wrapper = function(k_varname, l_varname, a_varname, params) {
-  var argsPop = '';
+  var code = "var " + k_varname + " = arguments[" + l_varname + "]; if (" + k_varname + " instanceof CpsContinuation) { ";
   if (a_varname) {
-    argsPop = "delete " + a_varname + "[" + l_varname + "]; " + a_varname + ".length--;";
+    code += "delete " + a_varname + "[" + l_varname + "]; " + a_varname + ".length--;";
   }
-  var fixParams = '';
   if (params.length > 0) {
-    fixParams = 'if (' + l_varname + ' >= ' + params.length + ') {';
+    code += "if (" + l_varname + " >= " + params.length + ") {";
     for (var i = params.length - 1; i >= 0; i--) {
       assert.equal(params[i].type, 'Identifier');
-      fixParams += '} else if (' + l_varname + ' >= ' + i + ') {' + params[i].name + ' = undefined;';
+      code += "} else if (" + l_varname + " >= " + i + ") {" + params[i].name + " = undefined;";
     }
-    fixParams += '}';
+    code += "}";
   }
-  var code = root.parse("var " + k_varname + " = arguments[" + l_varname + "]; if (" + k_varname + " instanceof CpsContinuation) { " + argsPop + fixParams + "}");
-  assert.equal(code.type, 'Program');
-  return code.body;
+  code += "}";
+  var ast = root.parse(code);
+  assert.equal(ast.type, 'Program');
+  return ast.body;
 };
 
 root.collect_all_identifiers = function(node) {
