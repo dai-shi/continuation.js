@@ -607,21 +607,24 @@ root.compile = function(data) {
   return root.generate(root.transform(root.parse(data)));
 };
 
+root.saved_require_js_function = null;
+
 root.enable_on_require = function() {
   var fs = require('fs');
-  require.extensions['.js'] = function(module, filename) {
-    var data = fs.readFileSync(filename, 'utf8');
-    module._compile(root.compile(data), filename);
-  };
+  if (!root.saved_require_js_function) {
+    root.saved_require_js_function = require.extensions['.js'];
+    require.extensions['.js'] = function(module, filename) {
+      var data = fs.readFileSync(filename, 'utf8');
+      module._compile(root.compile(data), filename);
+    };
+  }
 };
 
-//XXX not sure if this is really identical to the original function.
 root.disable_on_require = function() {
-  var fs = require('fs');
-  require.extensions['.js'] = function(module, filename) {
-    var data = fs.readFileSync(filename, 'utf8');
-    module._compile(data, filename);
-  };
+  if (root.saved_require_js_function) {
+    require.extensions['.js'] = root.saved_require_js_function;
+    root.saved_require_js_function = null;
+  }
 };
 
 
