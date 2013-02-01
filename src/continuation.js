@@ -192,20 +192,20 @@ root.transform_function_body = function(params, defaults, body, exclude_ids) {
   var using_this_var = root.replace_this_var_with(body.body, t_varname);
   var using_arguments = root.replace_arguments_with(body.body, a_varname);
   var header = root.ast_func_header(l_varname, using_this_var && t_varname, using_arguments && a_varname, exclude_ids);
-  var newbody = root.deep_clone(body.body);
+  var newbody = root.deep_clone(body);
   root.convert_function_call_to_new_cps_call(body.body, exclude_ids);
   var success = root.convert_normal_body_to_cps_body(k_varname, exclude_ids, newbody);
   if (success) {
-    while (newbody.length > 0) {
-      if (newbody[0].type === 'FunctionDeclaration') {
-        newbody.shift();
+    while (newbody.body.length > 0) {
+      if (newbody.body[0].type === 'FunctionDeclaration') {
+        newbody.body.shift();
       } else {
         break;
       }
     }
     var wrapper = root.ast_func_wrapper(k_varname, l_varname, using_arguments && a_varname, params);
     assert.ok(wrapper[1].consequent.body.length >= 0);
-    root.push(wrapper[1].consequent.body, newbody);
+    root.push(wrapper[1].consequent.body, newbody.body);
     root.push(wrapper[1].consequent.body, {
       type: 'ReturnStatement',
       argument: null
@@ -332,35 +332,11 @@ root.convert_function_call_to_new_cps_call = function(body, exclude_ids) {
   walk(body);
 };
 
-root.convert_statements_into_cps = function(k_varname, exclude_ids, statements) {
-  var i = 0;
-  while (i < statements.length) {
-    assert.ok(statements[i].type);
-    assert.equal(statements[i].type.slice(-9), 'Statement');
-    var converted = root.convert_statement_into_cps(k_varname, exclude_ids, statements[i], statements.slice(i + 1));
-    if (converted) {
-      statements.splice(i + 1);
-      statements[i] = {
-        type: 'ReturnStatement',
-        argument: converted
-      };
-      break;
-    }
-  }
-};
-
-root.convert_statement_into_cps = function(k_varname, exlude_ids, statement, rest) {
-  if (statement.type === 'ExpressionStatement') {
-    //TODO
-  } else {
-    return false;
-  }
-};
-
-// only converting obvious tail calls or return calls to cps
+// only converting tail calls
 root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
   var create_cps_expression = function(call_expression) {
     var kk_varname = root.generate_new_variable_name('kk', exclude_ids);
+    var call_expression1 = root.deep_clone(call_expression);
     var call_expression2 = root.deep_clone(call_expression);
     call_expression2.arguments.push({
       type: 'Identifier',
@@ -389,14 +365,14 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
               test: {
                 type: 'MemberExpression',
                 computed: false,
-                object: call_expression.callee,
+                object: call_expression1.callee,
                 property: {
                   type: 'Identifier',
                   name: 'CpsEnabled'
                 }
               },
               consequent: call_expression2,
-              alternate: call_expression
+              alternate: call_expression1
 
             }
           }]
@@ -410,79 +386,168 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
       }]
     };
   };
-  var walk = function(node, tail) {
-    if (node && (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression')) {
-      return true;
-    } else if (node && node.type === 'CallExpression' && !(node.callee && node.callee.id && node.callee.id.type === 'Identifier' && node.callee.id.name === 'CpsEnableWrapper')) {
-      return false;
-    } else if (node && node.type === 'ReturnStatement') {
-      if (node.argument && node.argument.type === 'CallExpression' && !(node.argument.callee && node.argument.callee.type === 'FunctionExpression')) {
-        node.argument = create_cps_expression(node.argument);
-        return true;
+
+  var create_cps_result = function(expression) {
+    return {
+      type: 'NewExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'CpsResult'
+      },
+      arguments: [{
+        type: 'CallExpression',
+        callee: {
+          type: 'MemberExpression',
+          computed: false,
+          object: {
+            type: 'Identifier',
+            name: k_varname
+          },
+          property: {
+            type: 'Identifier',
+            name: 'k'
+          }
+        },
+        arguments: [expression || {
+          type: 'Literal',
+          value: null
+        }]
+      }]
+    };
+  };
+
+  var is_callee_cpsenablewrapper = function(node) {
+    return node.callee && node.callee.id && node.callee.id.type === 'Identifier' && node.callee.id.name === 'CpsEnableWrapper';
+  };
+
+  // the walk function below returns the number of CpsFunction transformation.
+  var walk = function(node, tail, wrapped) {
+    var transformed;
+    var i;
+    if (node === undefined || node === null) {
+      return 0;
+
+    } else if (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') {
+      return 0;
+
+    } else if (node.type === 'CallExpression') {
+      if (tail && !wrapped && !is_callee_cpsenablewrapper(node)) {
+        var newnode = create_cps_expression(node);
+        _.each(node, function(value, key) {
+          delete node[key];
+        });
+        _.extend(node, newnode);
+        return 1;
       } else {
-        var success = walk(node.argument);
-        if (success) {
-          node.argument = {
-            type: 'NewExpression',
-            callee: {
-              type: 'Identifier',
-              name: 'CpsResult'
-            },
-            arguments: [{
-              type: 'CallExpression',
-              callee: {
-                type: 'MemberExpression',
-                computed: false,
-                object: {
-                  type: 'Identifier',
-                  name: k_varname
-                },
-                property: {
-                  type: 'Identifier',
-                  name: 'k'
-                }
-              },
-              arguments: [node.argument || {
-                type: 'Literal',
-                value: null
-              }]
-            }]
-          };
-          return true;
-        } else {
-          return false;
-        }
+        return 0;
       }
-    } else if (tail && node && node.type === 'IfStatement') {
-      return walk(node.consequent, tail) && walk(node.alternate, tail);
-    } else if (tail && node && node.type === 'BlockStatement') {
-      return walk(node.body, tail);
-    } else if (tail && Array.isArray(node)) {
-      for (var i = 0; i < node.length - 1; i++) {
-        var result = walk(node[i]);
-        if (!result) {
-          return false;
-        }
+
+    } else if (node.type === 'ConditionalExpression') {
+      return walk(node.test, false, wrapped) + walk(node.consequent, tail, wrapped) + walk(node.alternate, tail, wrapped);
+
+    } else if (node.type === 'SequenceExpression') {
+      transformed = 0;
+      for (i = 0; i < node.expressions.length; i++) {
+        transformed += walk(node.expressions[i], false, wrapped);
       }
-      var lastone = node[node.length - 1];
-      if (lastone && lastone.type === 'ExpressionStatement' && lastone.expression.type === 'CallExpression' && !(lastone.expression.callee && lastone.expression.callee.type === 'FunctionExpression')) {
-        node[node.length - 1] = {
-          type: 'ReturnStatement',
-          argument: create_cps_expression(lastone.expression)
-        };
-        return true;
-      } else {
-        return walk(lastone, tail);
+      return transformed;
+
+    } else if (node.type === 'AssignmentExpression' || node.type === 'BinaryExpression' || node.type === 'UpdateExpression' || node.type === 'MemberExpression' || node.type === 'LogicalExpression' || node.type === 'ArrayExpression' || node.type === 'ObjectExpression' || node.type === 'UnaryExpression' || node.type === 'NewExpression') {
+      return 0;
+
+      //TODO more expressions
+
+    } else if (node.type === 'BlockStatement') {
+      transformed = 0;
+      for (i = 0; i < node.body.length; i++) {
+        transformed += walk(node.body[i], (i === node.body.length - 1 ? tail : false), wrapped);
       }
-    } else if (node instanceof Object) {
-      return _.every(node, function(x) {
-        return walk(x);
-      });
+      return transformed;
+
+    } else if (node.type === 'ExpressionStatement') {
+      transformed = walk(node.expression, tail, wrapped);
+      if (transformed) {
+        node.type = 'ReturnStatement';
+        node.argument = node.expression;
+        delete node.expression;
+      }
+      return transformed;
+
+    } else if (node.type === 'DoWhileStatement' || node.type === 'WhileStatement') {
+      return walk(node.body, false, wrapped) + walk(node.test, false, wrapped);
+
+    } else if (node.type === 'ForStatement') {
+      return walk(node.body, false, wrapped) + walk(node.init, false, wrapped) + walk(node.test, false, wrapped) + walk(node.update, false, wrapped);
+
+    } else if (node.type === 'ForInStatement') {
+      return walk(node.body, false, wrapped) + walk(node.left, false, wrapped) + walk(node.right, false, wrapped);
+
+    } else if (node.type === 'IfStatement') {
+      return walk(node.consequent, tail, wrapped) + walk(node.alternate, tail, wrapped);
+
+    } else if (node.type === 'LabeledStatement') {
+      return walk(node.body, tail, wrapped);
+
+    } else if (node.type === 'WithStatement') {
+      return walk(node.body, tail, wrapped) + walk(node.object, false, wrapped);
+
+    } else if (node.type === 'ReturnStatement') {
+      transformed = walk(node.argument, !wrapped, false);
+      if (transformed === 0) {
+        node.argument = create_cps_result(node.argument);
+      }
+      return transformed;
+
+    } else if (node.type === 'TryStatement') {
+      transformed = walk(node.block, tail, true);
+      for (i = 0; i < node.guardedHandlers.length; i++) {
+        transformed += walk(node.guardedHandlers[i].body, tail, true);
+      }
+      for (i = 0; i < node.handlers.length; i++) {
+        transformed += walk(node.handlers[i].body, tail, true);
+      }
+      transformed += walk(node.finalizer, tail, wrapped);
+      return transformed;
+
+    } else if (node.type === 'ThrowStatement') {
+      return walk(node.argument, false, wrapped);
+
+    } else if (node.type === 'SwitchStatement') {
+      transformed = walk(node.discriminant, false, wrapped);
+      for (i = 0; i < node.cases.length; i++) {
+        transformed += walk(node.cases[i], false, wrapped);
+      }
+      return transformed;
+
+    } else if (node.type === 'SwitchCase') {
+      transformed = walk(node.test, false, wrapped);
+      for (i = 0; i < node.consequent.length; i++) {
+        transformed += walk(node.consequent[i], false, wrapped);
+      }
+      return transformed;
+
+    } else if (node.type === 'BreakStatement' || node.type === 'ContinueStatement' || node.type === 'EmptyStatement') {
+      return 0;
+
+    } else if (node.type === 'VariableDeclaration') {
+      transformed = 0;
+      for (i = 0; i < node.declarations.length; i++) {
+        transformed += walk(node.declarations[i].init, false, wrapped);
+      }
+      return transformed;
+
+    } else if (node.type === 'Identifier') {
+      return 0;
+
+    } else if (node.type === 'Literal') {
+      return 0;
+
     } else {
-      return true;
+      assert.fail(node, {}, 'unsupported node type: ' + JSON.stringify(node));
+      return 0;
     }
   };
-  return walk(body, true);
+  return walk(body, true, false);
 };
 
 root.create_cpsenabled_statement = function(cps_func_id) {
