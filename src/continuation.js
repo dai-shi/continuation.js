@@ -221,30 +221,31 @@ root.transform_function_body = function(params, defaults, body, exclude_ids) {
   return success;
 };
 
+root.has_side_effect = function(node) {
+  if (!node) {
+    return false;
+  } else if (node.type === 'FunctionExpression') { //not really side-effect
+    return true;
+  } else if (node.type === 'CallExpression') {
+    return true;
+  } else if (node.type === 'UpdateExpression') {
+    return true;
+  } else if (node.type === 'AssignmentExpression') {
+    return true;
+  } else if (node.type === 'NewExpression') {
+    return true;
+  } else if (node instanceof Object) {
+    return _.some(node, root.has_side_effect);
+  } else {
+    return false;
+  }
+};
+
 root.convert_function_call_to_new_cps_call = function(body, exclude_ids) {
-  var has_side_effect = function(node) {
-    if (!node) {
-      return false;
-    } else if (node.type === 'FunctionExpression') { //not really side-effect
-      return true;
-    } else if (node.type === 'CallExpression') {
-      return true;
-    } else if (node.type === 'UpdateExpression') {
-      return true;
-    } else if (node.type === 'AssignmentExpression') {
-      return true;
-    } else if (node.type === 'NewExpression') {
-      return true;
-    } else if (node instanceof Object) {
-      return _.some(node, has_side_effect);
-    } else {
-      return false;
-    }
-  };
   var is_transformable_call = function(node) {
     if (!node.callee) {
       return false;
-    } else if (has_side_effect(node.callee)) {
+    } else if (root.has_side_effect(node.callee)) {
       return false;
     } else if (node.callee.type === 'Identifier' && node.callee.name === 'CpsEnableWrapper') {
       return false;
@@ -431,7 +432,7 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
       return 0;
 
     } else if (node.type === 'CallExpression') {
-      if (tail && !wrapped && !is_callee_cpsenablewrapper(node)) {
+      if (tail && !wrapped && !is_callee_cpsenablewrapper(node) && !root.has_side_effect(node.callee)) {
         var newnode = create_cps_expression(node);
         _.each(node, function(value, key) {
           delete node[key];
