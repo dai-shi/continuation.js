@@ -455,8 +455,6 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
     } else if (node.type === 'AssignmentExpression' || node.type === 'BinaryExpression' || node.type === 'UpdateExpression' || node.type === 'MemberExpression' || node.type === 'LogicalExpression' || node.type === 'ArrayExpression' || node.type === 'ObjectExpression' || node.type === 'UnaryExpression' || node.type === 'NewExpression') {
       return 0;
 
-      //TODO more expressions
-
     } else if (node.type === 'BlockStatement') {
       transformed = 0;
       for (i = 0; i < node.body.length; i++) {
@@ -543,7 +541,7 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
       return 0;
 
     } else {
-      assert.fail(node, {}, 'unsupported node type: ' + JSON.stringify(node));
+      console.warn('continuing with unsupported node type: ' + node.type);
       return 0;
     }
   };
