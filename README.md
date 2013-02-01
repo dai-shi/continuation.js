@@ -135,22 +135,21 @@ The following is the results of Octane benchmark suites (except for one).
 
 | Suite name      | Original      | CPS transformed | Improved? |
 |-----------------|---------------|-----------------|-----------|
-| Richards        | 370 ops/sec   | 16.90 ops/sec   | No        |
-| DeltaBlue       | 178 ops/sec   | 6.24 ops/sec    | No        |
-| Encrypt         | 171 ops/sec   | 79.93 ops/sec   | No        |
-| Decrypt         | 9.23 ops/sec  | 3.65 ops/sec    | No        |
-| RayTrace        | 19.82 ops/sec | 2.23 ops/sec    | No        |
-| Earley          | 268 ops/sec   | 20.77 ops/sec   | No        |
-| Boyer           | 19.01 ops/sec | 2.14 ops/sec    | No        |
-| RegExp          | 7.20 ops/sec  | 5.00 ops/sec    | No        |
-| Splay           | 116 ops/sec   | 69.90 ops/sec   | No        |
-| NavierStokes    | 2.57 ops/sec  | 2.43 ops/sec    | No        |
-| PdfJS           | 2.67 ops/sec  | 2.49 ops/sec    | No        |
-| Gameboy         | 0.99 ops/sec  | 0.28 ops/sec    | No        |
-| CodeLoadClosure | 343 ops/sec   | 392 ops/sec     | Yes       |
-| CodeLoadJQuery  | 10.23 ops/sec | 10.36 ops/sec   | Yes       |
-| Box2D           | 2.28 ops/sec  | 2.48 ops/sec    | Yes       |
-
+| Richards        | 324 ops/sec   | 38.28 ops/sec   | No        |
+| DeltaBlue       | 188 ops/sec   | 12.90 ops/sec   | No        |
+| Encrypt         | 162 ops/sec   | 122 ops/sec     | No        |
+| Decrypt         | 8.62 ops/sec  | 6.86 ops/sec    | No        |
+| RayTrace        | 19.71 ops/sec | 4.10 ops/sec    | No        |
+| Earley          | 278 ops/sec   | 33.91 ops/sec   | No        |
+| Boyer           | 18.19 ops/sec | 1.60 ops/sec    | No        |
+| RegExp          | 7.12 ops/sec  | 5.14 ops/sec    | No        |
+| Splay           | 123 ops/sec   | 75.21 ops/sec   | No        |
+| NavierStokes    | 2.40 ops/sec  | 3.13 ops/sec    | Yes       |
+| PdfJS           | 2.85 ops/sec  | 2.68 ops/sec    | No        |
+| Gameboy         | 0.98 ops/sec  | 0.35 ops/sec    | No        |
+| CodeLoadClosure | 370 ops/sec   | 372 ops/sec     | Yes       |
+| CodeLoadJQuery  | 8.83 ops/sec  | 10.61 ops/sec   | Yes       |
+| Box2D           | 2.33 ops/sec  | 2.54 ops/sec    | Yes       |
 
 Limitations
 -----------
