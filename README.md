@@ -7,12 +7,13 @@ transformation with trampoline technique for Node.js
 JavaScript is a nice programming language, but compared to Scheme,
 it doesn't handle tail calls properly.
 Node.js is often used with callback functions,
-which tend to be tail calls (but not necessarily recursions).
+which tend to be tail calls (but not necessarily recursions)
+consuming call stacks.
 
 This module allows to transform native JavaScript code into
 CPS code in a best effort manner.
 It utilizes so-called trampoline technique to avoid a stack overflow error.
-Transforming all function into CPS is not very easy
+Transforming all functions into CPS is not very easy
 (and sometimes not very efficient),
 hence it has a fallback mechanism, that is, only supported
 function style is transformed into CPS and other functions are
@@ -151,6 +152,11 @@ The following is the results of Octane benchmark suites (except for one).
 | CodeLoadJQuery  | 8.83 ops/sec  | 10.61 ops/sec   | Yes       |
 | Box2D           | 2.33 ops/sec  | 2.54 ops/sec    | Yes       |
 
+Since trampoline is costly,
+performance drops in most suites especially basic ones.
+Whereas in relatively complex suites, there are some cases
+when performance is improved. (Anybody interested why this is happening?)
+
 Limitations
 -----------
 
@@ -161,6 +167,5 @@ Limitations
 TODOs
 -----
 
-* Transform all tail recursive calls into CPS.
 * Work with try...catch and throw.
 * Transform non-tail recursive calls into CPS.
