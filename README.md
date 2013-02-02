@@ -26,12 +26,48 @@ Comparison
 
 Here is the table showing modules that support tail call optimization.
 
-| NAME                    | continuation.js | [Brushtail][1] | [tailrec.js][2] | [thunk.js][3] | [tail-call][4] |
-|-------------------------|-----------------|----------------|-----------------|---------------|----------------|
-| Tail Call Optimization  | Yes             | Yes            | Yes             | Yes           | Yes            |
-| Mutual TCO              | Yes             | No             | Yes             | No            | No             |
-| Native JavaScript       | Yes             | Yes            | No              | No            | Almost         |
-| `require()` integration | Yes             | No             | No              | No            | No             |
+<table>
+<tr>
+<th>NAME</th>
+<th>continuation.js</th>
+<th>[Brushtail][1]</th>
+<th>[tailrec.js][2]</th>
+<th>[thunk.js][3]</th>
+<th>[tail-call][4]</th>
+</tr>
+<tr>
+<td>Tail Call Optimization</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Mutual Recursion</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Native JavaScript</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>Almost</td>
+</tr>
+<tr>
+<td>`require()` integration</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</table>
 
 [1]: https://github.com/pufuwozu/brushtail "pufuwozu/brushtail"
 [2]: https://github.com/natefaubion/tailrec.js "natefaubion/tailrec.js"
