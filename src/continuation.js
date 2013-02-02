@@ -500,13 +500,16 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
     } else if (node.type === 'TryStatement') {
       transformed = walk(node.block, tail, true);
       for (i = 0; i < node.guardedHandlers.length; i++) {
-        transformed += walk(node.guardedHandlers[i].body, tail, true);
+        transformed += walk(node.guardedHandlers[i].body, tail, (node.finalizer ? true : wrapped));
       }
       for (i = 0; i < node.handlers.length; i++) {
-        transformed += walk(node.handlers[i].body, tail, true);
+        transformed += walk(node.handlers[i].body, tail, (node.finalizer ? true : wrapped));
       }
       transformed += walk(node.finalizer, tail, wrapped);
       return transformed;
+
+    } else if (node.type === 'CatchClause') {
+      return walk(node.body, tail, wrapped);
 
     } else if (node.type === 'ThrowStatement') {
       return walk(node.argument, false, wrapped);
@@ -525,15 +528,18 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
       }
       return transformed;
 
-    } else if (node.type === 'BreakStatement' || node.type === 'ContinueStatement' || node.type === 'EmptyStatement') {
+    } else if (node.type === 'BreakStatement' || node.type === 'ContinueStatement' || node.type === 'EmptyStatement' || node.type === 'DebuggerStatement') {
       return 0;
 
     } else if (node.type === 'VariableDeclaration') {
       transformed = 0;
       for (i = 0; i < node.declarations.length; i++) {
-        transformed += walk(node.declarations[i].init, false, wrapped);
+        transformed += walk(node.declarations[i], false, wrapped);
       }
       return transformed;
+
+    } else if (node.type === 'VariableDeclarator') {
+      return walk(node.init, false, wrapped);
 
     } else if (node.type === 'Identifier') {
       return 0;
@@ -542,7 +548,7 @@ root.convert_normal_body_to_cps_body = function(k_varname, exclude_ids, body) {
       return 0;
 
     } else {
-      console.warn('continuing with unsupported node type: ' + node.type);
+      console.warn('continuing with unexpected node type: ' + node.type);
       return 0;
     }
   };
