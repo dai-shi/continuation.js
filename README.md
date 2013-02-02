@@ -31,9 +31,9 @@ Here is the table showing modules that support tail call optimization.
 <th>NAME</th>
 <th>continuation.js</th>
 <th><a href="https://github.com/pufuwozu/brushtail">Brushtail</a></th>
-<th>[tailrec.js][2]</th>
-<th>[thunk.js][3]</th>
-<th>[tail-call][4]</th>
+<th><a href="https://github.com/natefaubion/tailrec.js">tailrec.js</a></th>
+<th><a href="https://github.com/jayferd/thunk.js">thunk.js</a></th>
+<th><a href="https://github.com/Gozala/js-tail-call">tail-call</a></th>
 </tr>
 <tr>
 <td>Tail Call Optimization</td>
@@ -68,11 +68,6 @@ Here is the table showing modules that support tail call optimization.
 <td>No</td>
 </tr>
 </table>
-
-[1]: https://github.com/pufuwozu/brushtail "pufuwozu/brushtail"
-[2]: https://github.com/natefaubion/tailrec.js "natefaubion/tailrec.js"
-[3]: https://github.com/jayferd/thunk.js "jayferd/thunk.js"
-[4]: https://github.com/Gozala/js-tail-call "Gozala/js-tail-call"
 
 How to use
 ----------
