@@ -36,7 +36,7 @@ Here is the table showing modules that support tail call optimization.
 <th><a href="https://github.com/Gozala/js-tail-call">tail-call</a></th>
 </tr>
 <tr>
-<td>Tail Call Optimization</td>
+<td>Tail call optimization</td>
 <td>Yes</td>
 <td>Yes</td>
 <td>Yes</td>
@@ -44,7 +44,7 @@ Here is the table showing modules that support tail call optimization.
 <td>Yes</td>
 </tr>
 <tr>
-<td>Mutual Recursion</td>
+<td>Mutual recursion</td>
 <td>Yes</td>
 <td>No</td>
 <td>Yes</td>
@@ -165,23 +165,104 @@ Benchmark results
 
 The following is the results of Octane benchmark suites (except for one).
 
-| Suite name      | Original      | CPS transformed | Improved? |
-|-----------------|---------------|-----------------|-----------|
-| Richards        | 324 ops/sec   | 38.28 ops/sec   | No        |
-| DeltaBlue       | 188 ops/sec   | 12.90 ops/sec   | No        |
-| Encrypt         | 162 ops/sec   | 122 ops/sec     | No        |
-| Decrypt         | 8.62 ops/sec  | 6.86 ops/sec    | No        |
-| RayTrace        | 19.71 ops/sec | 4.10 ops/sec    | No        |
-| Earley          | 278 ops/sec   | 33.91 ops/sec   | No        |
-| Boyer           | 18.19 ops/sec | 1.60 ops/sec    | No        |
-| RegExp          | 7.12 ops/sec  | 5.14 ops/sec    | No        |
-| Splay           | 123 ops/sec   | 75.21 ops/sec   | No        |
-| NavierStokes    | 2.40 ops/sec  | 3.13 ops/sec    | Yes       |
-| PdfJS           | 2.85 ops/sec  | 2.68 ops/sec    | No        |
-| Gameboy         | 0.98 ops/sec  | 0.35 ops/sec    | No        |
-| CodeLoadClosure | 370 ops/sec   | 372 ops/sec     | Yes       |
-| CodeLoadJQuery  | 8.83 ops/sec  | 10.61 ops/sec   | Yes       |
-| Box2D           | 2.33 ops/sec  | 2.54 ops/sec    | Yes       |
+<table>
+<tr>
+<th>Suite name</th>
+<th>Original</th>
+<th>CPS transformed</th>
+<th>Improved?</th>
+</tr>
+<tr>
+<td>Richards</td>
+<td>324 ops/sec</td>
+<td>38.28 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>DeltaBlue</td>
+<td>188 ops/sec</td>
+<td>12.90 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Encrypt</td>
+<td>162 ops/sec</td>
+<td>122 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Decrypt</td>
+<td>8.62 ops/sec</td>
+<td>6.86 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>RayTrace</td>
+<td>19.71 ops/sec</td>
+<td>4.10 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Earley</td>
+<td>278 ops/sec</td>
+<td>33.91 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Boyer</td>
+<td>18.19 ops/sec</td>
+<td>1.60 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>RegExp</td>
+<td>7.12 ops/sec</td>
+<td>5.14 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Splay</td>
+<td>123 ops/sec</td>
+<td>75.21 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>NavierStokes</td>
+<td>2.40 ops/sec</td>
+<td>3.13 ops/sec</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>PdfJS</td>
+<td>2.85 ops/sec</td>
+<td>2.68 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Gameboy</td>
+<td>0.98 ops/sec</td>
+<td>0.35 ops/sec</td>
+<td>No</td>
+</tr>
+<tr>
+<td>CodeLoadClosure</td>
+<td>370 ops/sec</td>
+<td>372 ops/sec</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>CodeLoadJQuery</td>
+<td>8.83 ops/sec</td>
+<td>10.61 ops/sec</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Box2D</td>
+<td>2.33 ops/sec</td>
+<td>2.54 ops/sec</td>
+<td>Yes</td>
+</tr>
+</table>
 
 Since trampoline is costly,
 performance drops in most suites especially basic ones.
