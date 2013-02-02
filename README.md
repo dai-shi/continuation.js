@@ -30,7 +30,7 @@ Here is the table showing modules that support tail call optimization.
 <tr>
 <th>NAME</th>
 <th>continuation.js</th>
-<th>[Brushtail][1]</th>
+<th><a href="https://github.com/pufuwozu/brushtail">Brushtail</a></th>
 <th>[tailrec.js][2]</th>
 <th>[thunk.js][3]</th>
 <th>[tail-call][4]</th>
