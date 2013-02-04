@@ -1,7 +1,7 @@
 {
   "name": "continuation.js",
   "description": "A module for tail call optimization by Continuation Passing Style (CPS) transformation with trampoline technique for Node.js",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "Daishi Kato <daishi@axlight.com>",
   "dependencies": {
     "esprima": ">=1.0.2",
