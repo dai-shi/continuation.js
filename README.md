@@ -170,104 +170,90 @@ The following is the results of Octane benchmark suites (except for one).
 <th>Suite name</th>
 <th>Original</th>
 <th>CPS transformed</th>
-<th>Improved?</th>
+</tr>
+
+<tr>
+<td>Richards.Richards</td>
+<td>364 ops/sec</td>
+<td>28.14 ops/sec</td>
 </tr>
 <tr>
-<td>Richards</td>
-<td>324 ops/sec</td>
-<td>38.28 ops/sec</td>
-<td>No</td>
+<td>DeltaBlue.DeltaBlue</td>
+<td>181 ops/sec</td>
+<td>23.87 ops/sec</td>
 </tr>
 <tr>
-<td>DeltaBlue</td>
-<td>188 ops/sec</td>
-<td>12.90 ops/sec</td>
-<td>No</td>
+<td>Crypto.Encrypt</td>
+<td>172 ops/sec</td>
+<td>160 ops/sec</td>
 </tr>
 <tr>
-<td>Encrypt</td>
-<td>162 ops/sec</td>
-<td>122 ops/sec</td>
-<td>No</td>
+<td>Crypto.Decrypt</td>
+<td>9.08 ops/sec</td>
+<td>8.52 ops/sec</td>
 </tr>
 <tr>
-<td>Decrypt</td>
-<td>8.62 ops/sec</td>
-<td>6.86 ops/sec</td>
-<td>No</td>
+<td>RayTrace.RayTrace</td>
+<td>18.54 ops/sec</td>
+<td>5.21 ops/sec</td>
 </tr>
 <tr>
-<td>RayTrace</td>
-<td>19.71 ops/sec</td>
-<td>4.10 ops/sec</td>
-<td>No</td>
+<td>EarleyBoyer.Earley</td>
+<td>280 ops/sec</td>
+<td>71.44 ops/sec</td>
 </tr>
 <tr>
-<td>Earley</td>
-<td>278 ops/sec</td>
-<td>33.91 ops/sec</td>
-<td>No</td>
+<td>EarleyBoyer.Boyer</td>
+<td>18.86 ops/sec</td>
+<td>4.53 ops/sec</td>
 </tr>
 <tr>
-<td>Boyer</td>
-<td>18.19 ops/sec</td>
-<td>1.60 ops/sec</td>
-<td>No</td>
+<td>RegExp.RegExp</td>
+<td>7.11 ops/sec</td>
+<td>7.13 ops/sec</td>
 </tr>
 <tr>
-<td>RegExp</td>
-<td>7.12 ops/sec</td>
-<td>5.14 ops/sec</td>
-<td>No</td>
+<td>Splay.Splay</td>
+<td>121 ops/sec</td>
+<td>110 ops/sec</td>
 </tr>
 <tr>
-<td>Splay</td>
-<td>123 ops/sec</td>
-<td>75.21 ops/sec</td>
-<td>No</td>
+<td>NavierStokes.NavierStokes</td>
+<td>3.61 ops/sec</td>
+<td>2.89 ops/sec</td>
 </tr>
 <tr>
-<td>NavierStokes</td>
-<td>2.40 ops/sec</td>
-<td>3.13 ops/sec</td>
-<td>Yes</td>
-</tr>
-<tr>
-<td>PdfJS</td>
+<td>PdfJS.PdfJS</td>
 <td>2.85 ops/sec</td>
-<td>2.68 ops/sec</td>
-<td>No</td>
+<td>2.83 ops/sec</td>
 </tr>
 <tr>
-<td>Gameboy</td>
-<td>0.98 ops/sec</td>
-<td>0.35 ops/sec</td>
-<td>No</td>
+<td>Gameboy.Gameboy</td>
+<td>1.08 ops/sec</td>
+<td>0.59 ops/sec</td>
 </tr>
 <tr>
-<td>CodeLoadClosure</td>
-<td>370 ops/sec</td>
-<td>372 ops/sec</td>
-<td>Yes</td>
+<td>CodeLoad.CodeLoadClosure</td>
+<td>382 ops/sec</td>
+<td>368 ops/sec</td>
 </tr>
 <tr>
-<td>CodeLoadJQuery</td>
-<td>8.83 ops/sec</td>
-<td>10.61 ops/sec</td>
-<td>Yes</td>
+<td>CodeLoad.CodeLoadJQuery</td>
+<td>10.01 ops/sec</td>
+<td>11.12 ops/sec</td>
 </tr>
 <tr>
-<td>Box2D</td>
-<td>2.33 ops/sec</td>
-<td>2.54 ops/sec</td>
-<td>Yes</td>
+<td>Box2D.Box2D</td>
+<td>2.53 ops/sec</td>
+<td>2.55 ops/sec</td>
 </tr>
+
 </table>
 
 Since trampoline is costly,
 performance drops in most suites especially basic ones.
 Whereas in relatively complex suites, there are some cases
-when performance is improved. (Anybody interested why this is happening?)
+when performance is comparable.
 
 Limitations
 -----------
