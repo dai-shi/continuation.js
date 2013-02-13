@@ -255,15 +255,8 @@ performance drops in most suites especially basic ones.
 Whereas in relatively complex suites, there are some cases
 when performance is comparable.
 
-Limitations
------------
-
-* Not all calls are transformed into CPS.
-* `new Function` is not supported.
-* First-class continuation is not supported.
-
 TODOs
 -----
 
 * Work with try...catch and throw.
-* Transform non-tail recursive calls into CPS.
+* Transform simple non-tail recursive calls into CPS.
