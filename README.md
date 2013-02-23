@@ -64,7 +64,7 @@ Here is the table showing modules that support tail call optimization.
 <td>More or less</td>
 </tr>
 <tr>
-<td>`require()` integration</td>
+<td><code>require()</code> integration</td>
 <td>Yes</td>
 <td>No</td>
 <td>No</td>
