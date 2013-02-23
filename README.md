@@ -34,9 +34,11 @@ Here is the table showing modules that support tail call optimization.
 <th><a href="https://github.com/natefaubion/tailrec.js">tailrec.js</a></th>
 <th><a href="https://github.com/jayferd/thunk.js">thunk.js</a></th>
 <th><a href="https://github.com/Gozala/js-tail-call">tail-call</a></th>
+<th><a href="http://glat.info/jscheck/tomrec.xhtml">tailopt.js</a></th>
 </tr>
 <tr>
 <td>Tail call optimization</td>
+<td>Yes</td>
 <td>Yes</td>
 <td>Yes</td>
 <td>Yes</td>
@@ -47,9 +49,10 @@ Here is the table showing modules that support tail call optimization.
 <td>Mutual recursion</td>
 <td>Yes</td>
 <td>No</td>
+<td>No</td>
 <td>Yes</td>
 <td>No</td>
-<td>No</td>
+<td>Yes</td>
 </tr>
 <tr>
 <td>Native JavaScript</td>
@@ -57,11 +60,13 @@ Here is the table showing modules that support tail call optimization.
 <td>Yes</td>
 <td>No</td>
 <td>No</td>
-<td>Almost</td>
+<td>More or less</td>
+<td>More or less</td>
 </tr>
 <tr>
 <td>`require()` integration</td>
 <td>Yes</td>
+<td>No</td>
 <td>No</td>
 <td>No</td>
 <td>No</td>
