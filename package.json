@@ -1,7 +1,7 @@
 {
   "name": "continuation.js",
   "description": "A module for tail call optimization by Continuation Passing Style (CPS) transformation with trampoline technique for Node.js",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "author": "Daishi Kato <daishi@axlight.com>",
   "dependencies": {
     "esprima": ">=1.0.2",
@@ -11,7 +11,7 @@
   "devDependencies": {
     "mocha": "*",
     "jshint": "*",
-    "benchmark": "https://github.com/bestiejs/benchmark.js/tarball/master",
+    "benchmark": "git://github.com/bestiejs/benchmark.js.git#a838e23836",
     "benchmark-octane": "*",
     "benmkzoo": "*"
   },
