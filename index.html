@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="continuation.js : A module for tail call optimization by Continuation Passing Style (CPS) transformation with trampoline technique for Node.js">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>continuation.js</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/dai-shi/continuation.js">View on GitHub</a>
+
+          <h1 id="project_title">continuation.js</h1>
+          <h2 id="project_tagline">A module for tail call optimization by Continuation Passing Style (CPS) transformation with trampoline technique for Node.js</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/dai-shi/continuation.js/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/dai-shi/continuation.js/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="continuationjs" class="anchor" href="#continuationjs" aria-hidden="true"><span class="octicon octicon-link"></span></a>continuation.js</h1>
+
+<p>A module for tail call optimization by Continuation Passing Style (CPS)
+transformation with trampoline technique for Node.js</p>
+
+<p>JavaScript is a nice programming language, but compared to Scheme,
+it doesn't handle tail calls properly.
+Node.js is often used with callback functions,
+which tend to be tail calls (but not necessarily recursions)
+consuming call stacks.</p>
+
+<p>This module allows to transform native JavaScript code into
+CPS code in a best effort manner.
+It utilizes so-called trampoline technique to avoid a stack overflow error.
+Transforming all functions into CPS is not very easy
+(and sometimes not very efficient),
+hence it has a fallback mechanism, that is, only supported
+function style is transformed into CPS and other functions are
+called in an original style.
+Because of the fallback mechanism, mixing CPS code and non-CPS code
+is possible.</p>
+
+<h2>
+<a id="comparison" class="anchor" href="#comparison" aria-hidden="true"><span class="octicon octicon-link"></span></a>Comparison</h2>
+
+<p>Here is the table showing modules that support tail call optimization.</p>
+
+<table>
+<tr>
+<th>NAME</th>
+<th>continuation.js</th>
+<th><a href="https://github.com/pufuwozu/brushtail">Brushtail</a></th>
+<th><a href="https://github.com/natefaubion/tailrec.js">tailrec.js</a></th>
+<th><a href="https://github.com/jayferd/thunk.js">thunk.js</a></th>
+<th><a href="https://github.com/Gozala/js-tail-call">tail-call</a></th>
+<th><a href="http://glat.info/jscheck/tomrec.xhtml">tailopt.js</a></th>
+</tr>
+<tr>
+<td>Tail call optimization</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Mutual recursion</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Native JavaScript</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>More or less</td>
+<td>More or less</td>
+</tr>
+<tr>
+<td>
+<code>require()</code> integration</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</table>
+
+<h2>
+<a id="how-to-use" class="anchor" href="#how-to-use" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to use</h2>
+
+<h3>
+<a id="github" class="anchor" href="#github" aria-hidden="true"><span class="octicon octicon-link"></span></a>GitHub</h3>
+
+<pre><code>% git clone https://github.com/dai-shi/continuation.js.git
+% cd continuation.js
+% ./bin/continuation-compile sample/fact.js &gt; cps_fact.js
+</code></pre>
+
+<h3>
+<a id="npm" class="anchor" href="#npm" aria-hidden="true"><span class="octicon octicon-link"></span></a>NPM</h3>
+
+<pre><code>% npm install continuation.js
+</code></pre>
+
+<p>and add the following:</p>
+
+<pre><code>require('continuation.js').enable_on_require();
+</code></pre>
+
+<p>which transforms all following .js files by <code>require</code>.</p>
+
+<h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<p>Simple factorial function:</p>
+
+<pre><code>% cat sample/fact.js
+function fact(x) {
+  function fact_tail(x, r) {
+    if (x === 0) {
+      return r;
+    } else {
+      return fact_tail(x - 1, x * r);
+    }
+  }
+  return fact_tail(x, 1);
+}
+
+exports.fact = fact;
+
+% node -e "console.log(require('./sample/fact.js').fact(100000))"
+
+.../continuation.js/sample/fact.js:2
+  function fact_tail(x, r) {
+                        ^
+RangeError: Maximum call stack size exceeded
+
+% node -e "require('./lib/continuation.js').enable_on_require();console.log(require('./sample/fact.js').fact(100000))"
+Infinity
+</code></pre>
+
+<p>Mutual recursion example:</p>
+
+<pre><code>% cat sample/mutual.js
+function isEven(x) {
+  if (x === 0) {
+    return true;
+  } else {
+    return isOdd(x - 1);
+  }
+}
+
+function isOdd(x) {
+  if (x === 0) {
+    return false;
+  } else {
+    return isEven(x - 1);
+  }
+}
+
+exports.isEven = isEven;
+exports.isOdd = isOdd;
+
+% node -e "console.log(require('./sample/mutual.js').isOdd(1234567))"
+
+.../sample/mutual.js:1
+tion isEven(x) {
+       ^
+RangeError: Maximum call stack size exceeded
+% node -e "require('./lib/continuation.js').enable_on_require();console.log(require('./sample/mutual.js').isOdd(1234567))"
+true
+</code></pre>
+
+<h2>
+<a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>How it works</h2>
+
+<ul>
+<li>4 classes are defined in the global scope.
+
+<ul>
+<li>CpsFunction</li>
+<li>CpsContinuation</li>
+<li>CpsResult</li>
+<li>CpsRun</li>
+</ul>
+</li>
+<li>CPS enabled functions have the CpsEnabled=true property.</li>
+<li>Traversing AST to transform into CPS in a best effort manner.</li>
+<li>Keeping original code so that non-CPS is always possible.</li>
+</ul>
+
+<h2>
+<a id="benchmark-results" class="anchor" href="#benchmark-results" aria-hidden="true"><span class="octicon octicon-link"></span></a>Benchmark results</h2>
+
+<p>The following is the results of Octane benchmark suites (except for one).</p>
+
+<table>
+<tr>
+<th>Suite name</th>
+<th>Original</th>
+<th>CPS transformed</th>
+</tr>
+
+<tr>
+<td>Richards.Richards</td>
+<td>364 ops/sec</td>
+<td>28.14 ops/sec</td>
+</tr>
+<tr>
+<td>DeltaBlue.DeltaBlue</td>
+<td>181 ops/sec</td>
+<td>23.87 ops/sec</td>
+</tr>
+<tr>
+<td>Crypto.Encrypt</td>
+<td>172 ops/sec</td>
+<td>160 ops/sec</td>
+</tr>
+<tr>
+<td>Crypto.Decrypt</td>
+<td>9.08 ops/sec</td>
+<td>8.52 ops/sec</td>
+</tr>
+<tr>
+<td>RayTrace.RayTrace</td>
+<td>18.54 ops/sec</td>
+<td>5.21 ops/sec</td>
+</tr>
+<tr>
+<td>EarleyBoyer.Earley</td>
+<td>280 ops/sec</td>
+<td>71.44 ops/sec</td>
+</tr>
+<tr>
+<td>EarleyBoyer.Boyer</td>
+<td>18.86 ops/sec</td>
+<td>4.53 ops/sec</td>
+</tr>
+<tr>
+<td>RegExp.RegExp</td>
+<td>7.11 ops/sec</td>
+<td>7.13 ops/sec</td>
+</tr>
+<tr>
+<td>Splay.Splay</td>
+<td>121 ops/sec</td>
+<td>110 ops/sec</td>
+</tr>
+<tr>
+<td>NavierStokes.NavierStokes</td>
+<td>3.61 ops/sec</td>
+<td>2.89 ops/sec</td>
+</tr>
+<tr>
+<td>PdfJS.PdfJS</td>
+<td>2.85 ops/sec</td>
+<td>2.83 ops/sec</td>
+</tr>
+<tr>
+<td>Gameboy.Gameboy</td>
+<td>1.08 ops/sec</td>
+<td>0.59 ops/sec</td>
+</tr>
+<tr>
+<td>CodeLoad.CodeLoadClosure</td>
+<td>382 ops/sec</td>
+<td>368 ops/sec</td>
+</tr>
+<tr>
+<td>CodeLoad.CodeLoadJQuery</td>
+<td>10.01 ops/sec</td>
+<td>11.12 ops/sec</td>
+</tr>
+<tr>
+<td>Box2D.Box2D</td>
+<td>2.53 ops/sec</td>
+<td>2.55 ops/sec</td>
+</tr>
+
+</table>
+
+<p>Since trampoline is costly,
+performance drops in most suites especially basic ones.
+Whereas in relatively complex suites, there are some cases
+when performance is comparable.</p>
+
+<h2>
+<a id="todos" class="anchor" href="#todos" aria-hidden="true"><span class="octicon octicon-link"></span></a>TODOs</h2>
+
+<ul>
+<li>Work with try...catch and throw.</li>
+<li>Transform simple non-tail recursive calls into CPS.</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">continuation.js maintained by <a href="https://github.com/dai-shi">dai-shi</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
