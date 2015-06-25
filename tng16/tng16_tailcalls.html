@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>slides</title>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/css/reveal.min.css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/css/theme/blood.css" id="theme" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/lib/css/zenburn.css" />
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+    <section data-markdown data-separator="^\n\n\n" data-vertical="^\n\n" data-notes="^Note:">
+      <script type="text/template">
+## continuation.jsの話
+2015.6.26
+
+@dai_shi
+
+
+
+## ES2015にひっそり(?)入ったtail position calls
+![image](scn_es2015_tailcalls.png)
+
+
+
+## ECMAScript compatibility table
+![image](scn_es6table.png)
+- Babelでしか実装されていない!
+- しかもdirect recursionだけ
+
+
+
+## サンプルコード
+### direct recursion
+```
+function f(n) {
+  if (n <= 0) {
+    return "foo";
+  }
+  return f(n - 1);
+}
+console.log(f(1e6) === "foo");
+```
+
+
+
+## サンプルコード
+### mutual recursion
+```
+function f(n) {
+  if (n <= 0) {
+    return "foo";
+  }
+  return g(n - 1);
+}
+function g(n) {
+  if (n <= 0) {
+    return "bar";
+  }
+  return f(n - 1);
+}
+console.log(f(1e6) === "foo", f(1e6 + 1) === "bar");
+```
+
+
+
+## continuation.js
+- <https://github.com/dai-shi/continuation.js>
+![image](scn_continuationjs.png)
+- 初めはcall/ccを実装しようと思ってこういうPJ名にした
+- esprimaでASTにしてCPS変換してくれる
+
+
+
+## やってみよう
+### Install
+```
+$ npm install continuation.js
+```
+
+
+
+## やってみよう
+### direct recursion
+```
+$ node direct_recursion.js 
+RangeError: Maximum call stack size exceeded
+
+$ ./node_modules/.bin/continuation-compile direct_recursion.js > out.js
+
+$ node out.js
+true
+
+$ wc direct_recursion.js out.js 
+7   19  106 direct_recursion.js
+60  204 1462 out.js
+```
+
+
+
+## やってみよう
+### mutual recursion
+```
+$ node mutual_recursion.js 
+RangeError: Maximum call stack size exceeded
+
+$ ./node_modules/.bin/continuation-compile mutual_recursion.js >! out.js  
+
+$ node out.js
+true true
+
+$ wc mutual_recursion.js out.js
+14   40  204 mutual_recursion.js
+84  303 2140 out.js
+```
+
+
+
+## Tail Callsの練習にいかが?
+- continuation.jsは実験的PJで不具合もありますが、
+- best effortでCPS変換するというユニークな仕組みです
+- ES2015がサポートされたら無用の長物になってしまうので、
+- 今のうちに遊んであげてください
+- mutual recursionはまだ実装されていないようですし
+
+
+
+## おしまい
+- ES2015にはちゃんと使えるTail Callsに個人的に期待!
+    </script>
+  </div>
+</div>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/lib/js/head.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/js/reveal.min.js"></script>
+<script>
+  Reveal.initialize({
+    controls: false,
+    transition: 'convex',
+    dependencies: [
+      { src: '//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: '//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: '//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: '//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: '//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+      { src: '//cdnjs.cloudflare.com/ajax/libs/reveal.js/3.1.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+    ]
+  });
+</script>
+
+</body>
+</html>
