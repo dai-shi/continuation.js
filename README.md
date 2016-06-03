@@ -1,6 +1,8 @@
 continuation.js
 ===============
 
+[![npm version](https://badge.fury.io/js/continuation.js.svg)](https://badge.fury.io/js/continuation.js)
+
 A module for tail call optimization by Continuation Passing Style (CPS)
 transformation with trampoline technique for Node.js
 
