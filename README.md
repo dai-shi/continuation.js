@@ -81,13 +81,13 @@ How to use
 
 ### GitHub
 
-    % git clone https://github.com/dai-shi/continuation.js.git
-    % cd continuation.js
-    % ./bin/continuation-compile sample/fact.js > cps_fact.js
+    $ git clone https://github.com/dai-shi/continuation.js.git
+    $ cd continuation.js
+    $ ./bin/continuation-compile sample/fact.js > cps_fact.js
 
 ### NPM
 
-    % npm install continuation.js
+    $ npm install continuation.js
 
 and add the following:
 
@@ -100,7 +100,7 @@ Examples
 
 Simple factorial function:
 
-    % cat sample/fact.js
+    $ cat sample/fact.js
     function fact(x) {
       function fact_tail(x, r) {
         if (x === 0) {
@@ -114,19 +114,19 @@ Simple factorial function:
 
     exports.fact = fact;
 
-    % node -e "console.log(require('./sample/fact.js').fact(100000))"
+    $ node -e "console.log(require('./sample/fact.js').fact(100000))"
     
     .../continuation.js/sample/fact.js:2
       function fact_tail(x, r) {
                             ^
     RangeError: Maximum call stack size exceeded
     
-    % node -e "require('./lib/continuation.js').enable_on_require();console.log(require('./sample/fact.js').fact(100000))"
+    $ node -e "require('./lib/continuation.js').enable_on_require();console.log(require('./sample/fact.js').fact(100000))"
     Infinity
 
 Mutual recursion example:
 
-    % cat sample/mutual.js
+    $ cat sample/mutual.js
     function isEven(x) {
       if (x === 0) {
         return true;
@@ -146,13 +146,13 @@ Mutual recursion example:
     exports.isEven = isEven;
     exports.isOdd = isOdd;
 
-    % node -e "console.log(require('./sample/mutual.js').isOdd(1234567))"
+    $ node -e "console.log(require('./sample/mutual.js').isOdd(1234567))"
 
     .../sample/mutual.js:1
     tion isEven(x) {
            ^
     RangeError: Maximum call stack size exceeded
-    % node -e "require('./lib/continuation.js').enable_on_require();console.log(require('./sample/mutual.js').isOdd(1234567))"
+    $ node -e "require('./lib/continuation.js').enable_on_require();console.log(require('./sample/mutual.js').isOdd(1234567))"
     true
 
 How it works
